@@ -352,6 +352,7 @@ class VolumeRenderingGUI(qt.QWidget):
                 msgBox.setText('The parameters fil : ' + self.para_file + ' does not exist')
                 msgBox.exec_()
 
+            print './VTK_parameters/'+self.para_file
             line = source_file_para .readlines()[0]
             parameters = line.split(' ')
 
