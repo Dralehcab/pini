@@ -34,7 +34,7 @@ import ImageProcessing as IP
 import RegisteringIP as IPR
 import registerThread as rT
 import glob 
-#import nrrd
+import nrrd
 import nibabel as nib
 from scipy.cluster.vq import kmeans2, whiten
 import scipy.stats as stat
@@ -308,6 +308,8 @@ class Frame(qt.QWidget):
         elif self.inputFiles[0].endswith('.nrrd'):
 
             data, xxx = nrrd.read(self.inputFiles[0])
+            print data
+            print data.shape
             self.addImage( self.inputFiles[0],data)
             
         elif self.inputFiles[0].endswith('.nii'):
@@ -325,9 +327,6 @@ class Frame(qt.QWidget):
                         ImageOut[z,:,:] = filenii.get_data()[:,:,z,ni]
                         
                     ImageOut = IP.rotation(ImageOut,-90)
-                    zoom = filenii.header.get_zooms()
-                    factor = [0.05/zoom[1],0.05/zoom[0],0.05/zoom[2]]
-                    ImageOut = IP.resizeImage(ImageOut,"Linear",factor)
                     self.addImage( str(ni)+'_'+self.inputFiles[0].split('/')[-1],ImageOut)
                     
             elif len(shapeIm) <= 3:
@@ -335,11 +334,9 @@ class Frame(qt.QWidget):
                 for z in range(0,ImageOut.shape[0]):
                     ImageOut[z,:,:] = filenii.get_data()[:,:,z]
                 
-                ImageOut = IP.rotation(ImageOut,-90)
-                zoom = filenii.header.get_zooms()
-                factor = [0.05/zoom[1],0.05/zoom[0],0.05/zoom[2]]
-                ImageOut = IP.resizeImage(ImageOut,"Linear",factor)
-                self.addImage( self.inputFiles[0].split('/')[-1],ImageOut)
+                ImageOut = IP.rotation(ImageOut,90)
+                ImageOut = np.flipud(ImageOut)
+                self.addImage(self.inputFiles[0].split('/')[-1],ImageOut)
             
             
             
@@ -467,6 +464,8 @@ class Frame(qt.QWidget):
                 extension = '.png'
             elif (extensionNumber == 6) :
                 extension = '.dcm'
+            elif (extensionNumber == 7) :
+                extension = '.nrrd'
                 
             self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Image Sequence ", self.loaded_path , 'Images (*' + extension + ')')
 
@@ -497,14 +496,16 @@ class Frame(qt.QWidget):
 
             tree.write(pathXml +'/ImageInfo.xml')
 
-            if extensionNumber != 2:
-                self.exportThread=ExportThread(self.resultFileName,dataToStore,extension,self)
-                self.connect(self.exportThread,qt.SIGNAL("Progress"),self.setProgressBar)
-                self.exportThread.start()
+            if extensionNumber == 2:
+
+                ImageWritter.write_nifti(np.swapaxes(dataToStore,1,2), self.resultFileName+ '.nii')
+            elif extensionNumber == 7:
+
+                nrrd.write(self.resultFileName+'.nrrd',np.swapaxes(dataToStore, 0 ,2))
             else:
-                print ' Writting ' + self.resultFileName+ '.nii'
-                ImageWritter.write_nifti(dataToStore, self.resultFileName+ '.nii')
-                #nrrd.write(self.resultFileName+'.nrrd',np.swapaxes(dataToStore,1,2))
+                self.exportThread = ExportThread(self.resultFileName, dataToStore, extension, self)
+                self.connect(self.exportThread, qt.SIGNAL("Progress"), self.setProgressBar)
+                self.exportThread.start()
 
 
 

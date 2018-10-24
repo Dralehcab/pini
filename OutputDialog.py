@@ -14,6 +14,7 @@ class OutputDialog(qt.QDialog) :
         self.outputImageFormat.addItem("Matlab")
         self.outputImageFormat.addItem("PNG")
         self.outputImageFormat.addItem("Dicom")
+        self.outputImageFormat.addItem("Nrrd")
   
         buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel);
 
