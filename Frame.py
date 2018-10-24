@@ -308,8 +308,6 @@ class Frame(qt.QWidget):
         elif self.inputFiles[0].endswith('.nrrd'):
 
             data, xxx = nrrd.read(self.inputFiles[0])
-            print data
-            print data.shape
             self.addImage( self.inputFiles[0],data)
             
         elif self.inputFiles[0].endswith('.nii'):
@@ -317,8 +315,7 @@ class Frame(qt.QWidget):
             filenii = nib.load(self.inputFiles[0])
             
             shapeIm = filenii.get_data().shape
-            
-            print shapeIm
+
             if len(shapeIm) > 3:
                 nImage = shapeIm[3]
                 for ni in range(0,nImage):
@@ -2538,8 +2535,18 @@ class Frame(qt.QWidget):
 
         self._destack_GUI()
 
+    def hessian_GUI(self):
+        self.hide_all_button()
 
-
+        image = self.Data_list[self.imageSelection.currentRow()]
+        print image.shape
+        H = IP.hessian_matrix(image)
+        print H.shape
+        b_k =  IP.computeEigenvalueHessianMatrix(H)
+        print b_k.shape
+        self.addImage("Hessian1_ ", b_k[0,:,:,:])
+        self.addImage("Hessian2_ ", b_k[1, :, :, :])
+        self.addImage("Hessian3_ ", b_k[2, :, :, :])
 
     def _analysisROIGUI(self):
 
@@ -2764,9 +2771,6 @@ class Frame(qt.QWidget):
         self.hide_all_button()
 
         self.ratioButton = qt.QPushButton("Start")
-
-
-
 
         self.WindowSize= LabelEditAndButton(True, "Window Size", True, "4", False)
         self.Overlap = LabelEditAndButton(True, "Overlap", True, "0.5", False)

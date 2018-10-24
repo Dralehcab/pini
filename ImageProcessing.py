@@ -32,6 +32,38 @@ from PIL import Image, ImageDraw
 import entropy_estimators as ee
 
 
+def hessian_matrix(x):
+
+    x_grad = np.gradient(x)
+    hessian = np.empty((x.ndim, x.ndim) + x.shape, dtype=x.dtype)
+    for k, grad_k in enumerate(x_grad):
+
+        tmp_grad = np.gradient(grad_k)
+        for l, grad_kl in enumerate(tmp_grad):
+            hessian[k, l, :, :] = grad_kl
+    return hessian
+
+
+def computeEigenvalueHessianMatrix(H):
+
+    H_reshape = H.reshape((3,3,H.shape[2] * H.shape[3] * H.shape[4]))
+    b_k = power_method(H_reshape,20)
+
+    b_k = b_k.reshape((3,H.shape[2], H.shape[3], H.shape[4]))
+
+    return b_k
+
+def power_method(A, iterations):
+    b_k = np.random.rand(A.shape[1],A.shape[2])
+
+    for _ in range(iterations):
+        b_ki = np.einsum('ijk,jk->ik', A, b_k)
+        b_ki_norm = np.linalg.norm(b_ki,axis=0)
+        b_k = b_ki / b_ki_norm
+        print b_k[:, 100000]
+
+    return b_k
+
 def equalizeAlongLine(Image,posXY):
 
     Image = Image.astype(float) 

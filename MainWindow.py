@@ -197,7 +197,7 @@ class MyMainWindow(qt.QMainWindow) :
         qt.QObject.connect(segment_wh_Action, qt.SIGNAL("triggered()"), self.mainWidget._wh_segmentation_GUI)
         SegmentationMenu.addAction(segment_wh_Action)
 
-        EdgeDetectionMenu = ProcessMenu.addMenu('&Edge Detection')
+        EdgeDetectionMenu = ProcessMenu.addMenu('&Feature Detection')
 
         edge_GradientRGau_Action = qt.QAction('&Gradient Recursive Gaussian ', self)
         edge_GradientRGau_Action.setStatusTip('Gradient Recursive Gaussian ')
@@ -213,6 +213,12 @@ class MyMainWindow(qt.QMainWindow) :
         Zero_Crossing_Action.setStatusTip('Zero Crossing Edge')
         qt.QObject.connect(Zero_Crossing_Action, qt.SIGNAL("triggered()"), self.mainWidget.zero_Crossing_GUI)
         EdgeDetectionMenu.addAction(Zero_Crossing_Action)
+
+        hessian_Action = qt.QAction('&Hessian Detection', self)
+        hessian_Action.setStatusTip('Hessian Detection')
+        qt.QObject.connect(hessian_Action, qt.SIGNAL("triggered()"), self.mainWidget.hessian_GUI)
+        EdgeDetectionMenu.addAction(hessian_Action)
+
 
         FilterMenu = ProcessMenu.addMenu('&Filter')
 
