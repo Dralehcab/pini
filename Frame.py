@@ -325,7 +325,7 @@ class Frame(qt.QWidget):
                     ImageOut = np.zeros((shapeIm[2],shapeIm[0],shapeIm[1]))
                     for z in range(0,ImageOut.shape[0]):
                         ImageOut[z,:,:] = filenii.get_data()[:,:,z,ni]
-                        
+
                     ImageOut = IP.rotation(ImageOut,-90)
                     self.addImage( str(ni)+'_'+self.inputFiles[0].split('/')[-1],ImageOut)
                     
@@ -335,7 +335,6 @@ class Frame(qt.QWidget):
                     ImageOut[z,:,:] = filenii.get_data()[:,:,z]
                 
                 ImageOut = IP.rotation(ImageOut,90)
-                ImageOut = np.flipud(ImageOut)
                 self.addImage(self.inputFiles[0].split('/')[-1],ImageOut)
             
             
@@ -498,7 +497,7 @@ class Frame(qt.QWidget):
 
             if extensionNumber == 2:
 
-                ImageWritter.write_nifti(np.swapaxes(dataToStore,1,2), self.resultFileName+ '.nii')
+                ImageWritter.write_nifti(np.swapaxes(dataToStore,0,2), self.resultFileName+ '.nii')
             elif extensionNumber == 7:
 
                 nrrd.write(self.resultFileName+'.nrrd',np.swapaxes(dataToStore, 0 ,2))

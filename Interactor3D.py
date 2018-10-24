@@ -160,7 +160,7 @@ class SliceVisualizer(qt.QWidget):
         self.data[self.data >= 255] = 255
         self.data[self.data <= 0] = 0
         self.data = np.array(self.data, dtype=np.uint8)
-        
+        print self.data
         if self.flagAlpha :
             self.dataAlpha = 255 * (self.sliceAlpha - self.minAlpha) / (self.maxAlpha - self.minAlpha)
             self.dataAlpha[self.dataAlpha >= 255] = 255
@@ -216,6 +216,8 @@ class SliceVisualizer(qt.QWidget):
         self.flagFirstCircle = True
 
         self.image = qt.QImage(self.data, self.data.shape[1], self.data.shape[0], self.data.shape[1],qt.QImage.Format_Indexed8)
+
+
         self.image.setColorTable(self.colortable)
         pixMap = qt.QPixmap.fromImage(self.image)
         pixItem = qt.QGraphicsPixmapItem(pixMap)
