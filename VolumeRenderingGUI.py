@@ -118,8 +118,12 @@ class VolumeRenderingGUI(qt.QWidget):
         self.connect(self.parameters_TitleAndIcons.load,qt.SIGNAL("clicked()"),self._buttonParaLoadPushed)
 
 
+
         self.renderButton = qt.QPushButton("Render")
         self.renderButton.setMaximumWidth(width_widget)
+
+        self.saveButton = qt.QPushButton("Save")
+        self.saveButton.setMaximumWidth(width_widget)
 
 
         self.check_box_mesh = qt.QCheckBox("Marching Cube Volume")
@@ -184,6 +188,8 @@ class VolumeRenderingGUI(qt.QWidget):
         self.fill_para()
 
 
+
+
         self.mainLayout.addWidget(self.frame,0,0)
 
         self.mainLayout.addWidget(self.color_TitleAndIcons,0,1)
@@ -218,12 +224,14 @@ class VolumeRenderingGUI(qt.QWidget):
 #        self.mainLayout.addWidget(self.sliderSpeP,22,2)
 #        self.mainLayout.addWidget(self.LabelOpa,23,2)
 #        self.mainLayout.addWidget(self.sliderOpa,24,2)
-        self.mainLayout.addWidget(self.renderButton,12,2)
+        self.mainLayout.addWidget(self.saveButton, 12, 2)
+        self.mainLayout.addWidget(self.renderButton,13,2)
 
         self.setLayout(self.mainLayout)
 
 
         qt.QObject.connect(self.renderButton, qt.SIGNAL("clicked()"), self._render)
+        qt.QObject.connect(self.saveButton, qt.SIGNAL("clicked()"), self._save)
 
     def check_parameters_files(self):
         source_file_color = open('./VTK_parameters/history', "r")
@@ -654,3 +662,8 @@ class VolumeRenderingGUI(qt.QWidget):
 
     def _multiSnapshot(self):
         self.frame.take_multi_rotation_screen_shot(self.snapshotPath.textEdit, 360)
+
+    def _save(self):
+
+        self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Mesh ", "/")
+        self.frame.save_mesh(self.resultFileName)

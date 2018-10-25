@@ -313,25 +313,15 @@ class Frame(qt.QWidget):
         elif self.inputFiles[0].endswith('.nii'):
             
             filenii = nib.load(self.inputFiles[0])
-            
-            shapeIm = filenii.get_data().shape
+            ImageOut = np.asarray(filenii.get_data())
+            shapeIm= ImageOut.shape
 
             if len(shapeIm) > 3:
                 nImage = shapeIm[3]
                 for ni in range(0,nImage):
-                    ImageOut = np.zeros((shapeIm[2],shapeIm[0],shapeIm[1]))
-                    for z in range(0,ImageOut.shape[0]):
-                        ImageOut[z,:,:] = filenii.get_data()[:,:,z,ni]
-
-                    ImageOut = IP.rotation(ImageOut,-90)
-                    self.addImage( str(ni)+'_'+self.inputFiles[0].split('/')[-1],ImageOut)
+                    self.addImage( str(ni)+'_'+self.inputFiles[0].split('/')[-1],ImageOut[:,:,:,:,ni])
                     
             elif len(shapeIm) <= 3:
-                ImageOut = np.zeros((shapeIm[2],shapeIm[0],shapeIm[1]))
-                for z in range(0,ImageOut.shape[0]):
-                    ImageOut[z,:,:] = filenii.get_data()[:,:,z]
-                
-                ImageOut = IP.rotation(ImageOut,90)
                 self.addImage(self.inputFiles[0].split('/')[-1],ImageOut)
             
             

@@ -63,45 +63,42 @@ class VTK_Render_QT(qt.QFrame):
         
         print 'Marching'
         
-        smoother =  vtk.vtkSmoothPolyDataFilter()
-        smoother.SetInputConnection(self.dmc.GetOutputPort())
-        smoother.SetNumberOfIterations(10)
-        smoother.SetRelaxationFactor(0.2)#this has little effect on the error!
+        #smoother = vtk.vtkSmoothPolyDataFilter()
+        #smoother.SetInputConnection(self.dmc.GetOutputPort())
+        #smoother.SetNumberOfIterations(10)
+        #smoother.SetRelaxationFactor(0.2)#this has little effect on the error!
         
         print 'Smooth'
         
-        self.dmc = vtk.vtkPolyDataNormals()
-        self.dmc.SetInputConnection(smoother.GetOutputPort())
+        #self.dmc = vtk.vtkPolyDataNormals()
+        #self.dmc.SetInputConnection(smoother.GetOutputPort())
 
 
-        self.decimate = vtk.vtkDecimatePro()
-        self.decimate.SetInputConnection(self.dmc.GetOutputPort())
-        self.decimate.SetTargetReduction(.10)
-        self.decimate.Update()
+#        self.decimate = vtk.vtkDecimatePro()
+#       self.decimate.SetInputConnection(self.dmc.GetOutputPort())
+#        self.decimate.SetTargetReduction(.10)
+#        self.decimate.Update()
 
 
-        print 'Dec'
 
+
+    def save_mesh(self, path):
         stlWriter = vtk.vtkSTLWriter()
-        stlWriter.SetFileName('./Data/' + strftime("dcm"+"%Y-%m-%d %H:%M:%S", gmtime())+'.stl')
-        stlWriter.SetInputConnection(self.decimate.GetOutputPort())
+        stlWriter.SetFileName(path +'.stl')
+        stlWriter.SetInputConnection(self.dmc.GetOutputPort())
         stlWriter.SetFileTypeToBinary()
         stlWriter.Write()
 
+
     def SmoothMesh(self,nbIter,RelaxFactor):
 
-        smoother =  vtk.vtkSmoothPolyDataFilter()
+        smoother = vtk.vtkSmoothPolyDataFilter()
         smoother.SetInputConnection(self.dmc.GetOutputPort())
         smoother.SetNumberOfIterations(nbIter)
         smoother.SetRelaxationFactor(RelaxFactor)#this has little effect on the error!
         self.dmc = vtk.vtkPolyDataNormals()
         self.dmc.SetInputConnection(smoother.GetOutputPort())
-        stlWriter = vtk.vtkSTLWriter()
 
-        stlWriter.SetFileName('./Data/' + strftime("%Y-%m-%d %H:%M:%S", gmtime())+'.stl')
-        stlWriter.SetFileTypeToBinary()
-        stlWriter.SetInputConnection(self.dmc.GetOutputPort())
-        stlWriter.Write()
 
     def init_all_VolumeRendering_component(self, flagMesh):
         self.flagMesh = flagMesh
@@ -187,7 +184,7 @@ class VTK_Render_QT(qt.QFrame):
         self.volume_mapper.RemoveAllInputs()
 
         if self.flagMesh:
-            self.volume_mapper.SetInputConnection(self.decimate.GetOutputPort())
+            self.volume_mapper.SetInputConnection(self.dmc.GetOutputPort())
         else:
             self.volume_mapper.SetInputConnection(self.data_importer.GetOutputPort())
             self.volume_mapper.AutoAdjustSampleDistancesOn()
