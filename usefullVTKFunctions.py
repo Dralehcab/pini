@@ -73,9 +73,26 @@ class VTK_Render_QT(qt.QFrame):
         self.dmc = vtk.vtkPolyDataNormals()
         self.dmc.SetInputConnection(smoother.GetOutputPort())
 
+    def compute_Curvature(self):
 
-    def init_all_VolumeRendering_component(self, flagMesh):
+        self.curvaturesFilter = vtk.vtkCurvatures()
+
+        self.curvaturesFilter.SetInputConnection(self.dmc.GetOutputPort())
+
+        #curvaturesFilter.SetCurvatureTypeToMinimum()
+        #curvaturesFilter.SetCurvatureTypeToMaximum()
+        self.curvaturesFilter.SetCurvatureTypeToGaussian()
+        #curvaturesFilter.SetCurvatureTypeToMean()
+        self.curvaturesFilter.Update()
+
+
+
+
+
+
+    def init_all_VolumeRendering_component(self, flagMesh, flagCurvature):
         self.flagMesh = flagMesh
+        self.flagCurvature = flagMesh
         self.ren= vtk.vtkRenderer()
         self.renWin.AddRenderer(self.ren)
         self.iren = vtk.vtkXRenderWindowInteractor()
@@ -97,7 +114,7 @@ class VTK_Render_QT(qt.QFrame):
 
         self.data_importer = vtk.vtkImageImport()
 
-        if self.flagMesh :
+        if (self.flagMesh or self.flagCurvature):
             self.volume_mapper = vtk.vtkPolyDataMapper()
         else:
             self.volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
@@ -159,8 +176,12 @@ class VTK_Render_QT(qt.QFrame):
 
         self.volume_mapper.RemoveAllInputs()
 
-        if self.flagMesh:
+        if self.flagMesh and not self.flagCurvature:
             self.volume_mapper.SetInputConnection(self.dmc.GetOutputPort())
+        elif self.flagCurvature:
+            self.volume_mapper.SetInputConnection(self.curvaturesFilter.GetOutputPort())
+            self.volume_mapper.SetLookupTable(self.color_function)
+
         else:
             self.volume_mapper.SetInputConnection(self.data_importer.GetOutputPort())
             self.volume_mapper.AutoAdjustSampleDistancesOn()

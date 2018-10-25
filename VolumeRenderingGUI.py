@@ -586,14 +586,24 @@ class VolumeRenderingGUI(qt.QWidget):
         maxValue = np.max(volumeToRender)
         self.flag_mesh = bool(self.check_box_mesh.checkState())
 
-        self.frame.init_all_VolumeRendering_component(self.flag_mesh)
+        self.flag_curvature_calculation = bool(self.compute_Curvature.checkState())
+        self.flag_distance_calculation = bool(self.compute_Distance.checkState())
 
+        self.frame.init_all_VolumeRendering_component(self.flag_mesh,self.flag_curvature_calculation)
 
         self.frame.add_arrow_field(arrow)
         self.frame.import_numpy_array(volumeToRender, minValue, maxValue)
-        if self.flag_mesh:
 
+        if self.flag_mesh:
             self.frame.MarchingCube(float(self.ThresholdMC.lineEdit.text()))
+
+            if self.flag_curvature_calculation:
+                self.frame.flagCurvature = True
+                self.frame.compute_Curvature()
+            else:
+                self.frame.flagCurvature = False
+
+
 
             if bool(self.check_smooth.checkState()):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())
@@ -651,6 +661,12 @@ class VolumeRenderingGUI(qt.QWidget):
             self.frame.add_PolyActor()
         else:
             self.frame.add_volume_to_renderer()
+
+        if self.flag_curvature_calculation:
+            self.frame.compute_Curvature()
+
+        elif self.flag_distance_calculation:
+            self.frame.compute_Distance()
 
         #self.frame.change_widget_size([2560, 1600])
         self.frame.update_renderer([0.1, 0.1, 0.1])
