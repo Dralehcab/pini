@@ -48,7 +48,7 @@ class VolumeRenderingGUI(qt.QWidget):
 
         self.Xplane = LabelEditAndButton(True, "X: ", True, str(0), False)
         self.Xplane.setMaximumWidth(width_widget/3.0)
-        self.Yplane = LabelEditAndButton(True, "X: ", True, str(0), False)
+        self.Yplane = LabelEditAndButton(True, "Y: ", True, str(0), False)
         self.Yplane.setMaximumWidth(width_widget/3.0)
         self.Zplane = LabelEditAndButton(True, "Z: ", True, str(0), False)
         self.Zplane.setMaximumWidth(width_widget/3.0)
@@ -117,13 +117,18 @@ class VolumeRenderingGUI(qt.QWidget):
         self.connect(self.parameters_TitleAndIcons.saveas,qt.SIGNAL("clicked()"),self._buttonParaSaveasPushed)
         self.connect(self.parameters_TitleAndIcons.load,qt.SIGNAL("clicked()"),self._buttonParaLoadPushed)
 
-
-
         self.renderButton = qt.QPushButton("Render")
         self.renderButton.setMaximumWidth(width_widget)
 
-        self.saveButton = qt.QPushButton("Save")
+        self.saveButton = qt.QPushButton("Save Mesh")
         self.saveButton.setMaximumWidth(width_widget)
+
+        self.compute_Distance = qt.QCheckBox("Compute Distance Map")
+        self.compute_Curvature = qt.QCheckBox("Compute Curvature Map")
+
+        self.compute_Distance.setMaximumWidth(width_widget)
+        self.compute_Curvature.setMaximumWidth(width_widget)
+
 
 
         self.check_box_mesh = qt.QCheckBox("Marching Cube Volume")
@@ -148,7 +153,7 @@ class VolumeRenderingGUI(qt.QWidget):
         self.sliderAmb = SliderAndLabel.SliderAndLabelSpecificScale()
         self.sliderAmb.setMaximumWidth(width_widget)
         self.sliderAmb._setStepPrecision(0.05)
-        self.sliderAmb._setRange(0,10.0)
+        self.sliderAmb._setRange(0,100.0)
         self.sliderAmb.setContentsMargins(-1,0,-1,-1)
 
         self.LabelDif=qt.QLabel("Diffuse lighting Coefficient")
@@ -156,7 +161,7 @@ class VolumeRenderingGUI(qt.QWidget):
         self.sliderDif = SliderAndLabel.SliderAndLabelSpecificScale()
         self.sliderDif.setMaximumWidth(width_widget)
         self.sliderDif._setStepPrecision(0.05)
-        self.sliderDif._setRange(0,10.0)
+        self.sliderDif._setRange(0,100.0)
         self.sliderDif.setContentsMargins(-1,0,-1,-1)
 
         self.LabelSpe=qt.QLabel("Specular lighting Coefficient")
@@ -164,7 +169,7 @@ class VolumeRenderingGUI(qt.QWidget):
         self.sliderSpe = SliderAndLabel.SliderAndLabelSpecificScale()
         self.sliderSpe.setMaximumWidth(width_widget)
         self.sliderSpe._setStepPrecision(0.05)
-        self.sliderSpe._setRange(0,10.0)
+        self.sliderSpe._setRange(0,100.0)
         self.sliderSpe.setContentsMargins(-1,0,-1,-1)
 
         self.LabelSpeP=qt.QLabel("Specular power Coefficient")
@@ -172,9 +177,8 @@ class VolumeRenderingGUI(qt.QWidget):
         self.sliderSpeP = SliderAndLabel.SliderAndLabelSpecificScale()
         self.sliderSpeP.setMaximumWidth(width_widget)
         self.sliderSpeP._setStepPrecision(0.05)
-        self.sliderSpeP._setRange(0,10.0)
+        self.sliderSpeP._setRange(0,100.0)
         self.sliderSpeP.setContentsMargins(-1,0,-1,-1)
-
 
         self.LabelOpa=qt.QLabel("Opacity unit distance")
         self.LabelOpa.setContentsMargins(-1,-1,-1,0)
@@ -185,10 +189,9 @@ class VolumeRenderingGUI(qt.QWidget):
         self.sliderOpa._setRange(0,1000)
         self.sliderOpa.setContentsMargins(-1,0,-1,-1)
 
+
+
         self.fill_para()
-
-
-
 
         self.mainLayout.addWidget(self.frame,0,0)
 
@@ -203,32 +206,34 @@ class VolumeRenderingGUI(qt.QWidget):
         self.mainLayout.addWidget(self.comboBoxVF,4,2)
         self.mainLayout.addWidget(self.labelP,5,2)
         self.mainLayout.addWidget(self.comboBoxP,6,2)
+        self.mainLayout.addLayout(self.LayoutPlane, 7, 2)
 
-        self.mainLayout.addWidget(self.check_box_mesh,7,2)
-        self.mainLayout.addWidget(self.ThresholdMC,8,2)
+        self.mainLayout.addWidget(self.compute_Distance,8,2)
+        self.mainLayout.addWidget(self.compute_Curvature,9,2)
 
-        self.mainLayout.addWidget(self.check_smooth,9,2)
-        self.mainLayout.addWidget(self.SmoothIterNb,10,2)
-        self.mainLayout.addWidget(self.SmoothRelaxF,11,2)
+        self.mainLayout.addWidget(self.check_box_mesh,10,2)
+        self.mainLayout.addWidget(self.ThresholdMC,11,2)
 
-#        self.mainLayout.addLayout(self.LayoutPlane,12,2)
-#        self.mainLayout.addWidget(self.parameters_TitleAndIcons,13,2)
-#        self.mainLayout.addWidget(self.checkBox,14,2)
-#        self.mainLayout.addWidget(self.LabelAmb,15,2)
-#        self.mainLayout.addWidget(self.sliderAmb,16,2)
-#        self.mainLayout.addWidget(self.LabelDif,17,2)
-#        self.mainLayout.addWidget(self.sliderDif,18,2)
-#        self.mainLayout.addWidget(self.LabelSpe,19,2)
-#        self.mainLayout.addWidget(self.sliderSpe,20,2)
-#        self.mainLayout.addWidget(self.LabelSpeP,21,2)
-#        self.mainLayout.addWidget(self.sliderSpeP,22,2)
-#        self.mainLayout.addWidget(self.LabelOpa,23,2)
-#        self.mainLayout.addWidget(self.sliderOpa,24,2)
-        self.mainLayout.addWidget(self.saveButton, 12, 2)
-        self.mainLayout.addWidget(self.renderButton,13,2)
+        self.mainLayout.addWidget(self.check_smooth,12,2)
+        self.mainLayout.addWidget(self.SmoothIterNb,13,2)
+        self.mainLayout.addWidget(self.SmoothRelaxF,14,2)
+
+        self.mainLayout.addWidget(self.parameters_TitleAndIcons,15,2)
+        self.mainLayout.addWidget(self.checkBox,16,2)
+        self.mainLayout.addWidget(self.LabelAmb,17,2)
+        self.mainLayout.addWidget(self.sliderAmb,18,2)
+        self.mainLayout.addWidget(self.LabelDif,19,2)
+        self.mainLayout.addWidget(self.sliderDif,20,2)
+        self.mainLayout.addWidget(self.LabelSpe,21,2)
+        self.mainLayout.addWidget(self.sliderSpe,22,2)
+        self.mainLayout.addWidget(self.LabelSpeP,23,2)
+        self.mainLayout.addWidget(self.sliderSpeP,24,2)
+        self.mainLayout.addWidget(self.LabelOpa,25,2)
+        self.mainLayout.addWidget(self.sliderOpa,26,2)
+        self.mainLayout.addWidget(self.saveButton, 27, 2)
+        self.mainLayout.addWidget(self.renderButton,28,2)
 
         self.setLayout(self.mainLayout)
-
 
         qt.QObject.connect(self.renderButton, qt.SIGNAL("clicked()"), self._render)
         qt.QObject.connect(self.saveButton, qt.SIGNAL("clicked()"), self._save)
@@ -268,8 +273,6 @@ class VolumeRenderingGUI(qt.QWidget):
                 msgBox = qt.QMessageBox(self)
                 msgBox.setText('Missing parameters file')
                 msgBox.exec_()
-
-
 
     def fill_colorTable(self):
         if self.color_file != 'empty':
@@ -380,7 +383,6 @@ class VolumeRenderingGUI(qt.QWidget):
             self.sliderSpe._defaultValue(1)
             self.sliderSpeP._defaultValue(1)
             self.sliderOpa._defaultValue(1)
-
 
     def _buttonColorSavePushed(self):
         source_file_color = open('./VTK_parameters/history', "r")
@@ -654,7 +656,6 @@ class VolumeRenderingGUI(qt.QWidget):
         self.frame.update_renderer([0.1, 0.1, 0.1])
         #self.frame.show()
         self.frame.launch_render()
-
 
     def _snapshot(self):
 

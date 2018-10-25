@@ -29,17 +29,12 @@ class VTK_Render_QT(qt.QFrame):
         """
         Format the volume to a 0-255 image uint16
         """
-
         vol = (255 * (vol - minValue)) / (maxValue - minValue)
         vol = vol.astype(np.uint8)
         vol[vol < 0 ] = 0
         vol[vol > 255 ] = 255
 
         return vol
-
-
-
-
 
     def MarchingCube(self,thresholdValue):
 
@@ -58,28 +53,7 @@ class VTK_Render_QT(qt.QFrame):
         self.dmc = vtk.vtkMarchingCubes()
         self.dmc.SetInputConnection(threshold.GetOutputPort())
         self.dmc.GenerateValues(1, 1, 1)
-#        self.dmc.SetNumberOfContours( 1 )
         self.dmc.Update()
-        
-        print 'Marching'
-        
-        #smoother = vtk.vtkSmoothPolyDataFilter()
-        #smoother.SetInputConnection(self.dmc.GetOutputPort())
-        #smoother.SetNumberOfIterations(10)
-        #smoother.SetRelaxationFactor(0.2)#this has little effect on the error!
-        
-        print 'Smooth'
-        
-        #self.dmc = vtk.vtkPolyDataNormals()
-        #self.dmc.SetInputConnection(smoother.GetOutputPort())
-
-
-#        self.decimate = vtk.vtkDecimatePro()
-#       self.decimate.SetInputConnection(self.dmc.GetOutputPort())
-#        self.decimate.SetTargetReduction(.10)
-#        self.decimate.Update()
-
-
 
 
     def save_mesh(self, path):
@@ -129,6 +103,8 @@ class VTK_Render_QT(qt.QFrame):
             self.volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
 
         self.volume = vtk.vtkVolume()
+
+
 
     def import_numpy_array(self, np_array,minValue,maxValue):
 
