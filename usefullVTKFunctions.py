@@ -82,13 +82,11 @@ class VTK_Render_QT(qt.QFrame):
     def compute_Curvature(self):
 
         self.curvaturesFilter = vtk.vtkCurvatures()
-
         self.curvaturesFilter.SetInputConnection(self.dmc.GetOutputPort())
-
         #curvaturesFilter.SetCurvatureTypeToMinimum()
         #curvaturesFilter.SetCurvatureTypeToMaximum()
-        self.curvaturesFilter.SetCurvatureTypeToGaussian()
-        #curvaturesFilter.SetCurvatureTypeToMean()
+        #self.curvaturesFilter.SetCurvatureTypeToGaussian()
+        self.curvaturesFilter.SetCurvatureTypeToMean()
         self.curvaturesFilter.Update()
 
 
