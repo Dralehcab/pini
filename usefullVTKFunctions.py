@@ -70,8 +70,14 @@ class VTK_Render_QT(qt.QFrame):
         smoother.SetInputConnection(self.dmc.GetOutputPort())
         smoother.SetNumberOfIterations(nbIter)
         smoother.SetRelaxationFactor(RelaxFactor)#this has little effect on the error!
+        smoother.FeatureEdgeSmoothingOff()
+        smoother.BoundarySmoothingOn()
+
         self.dmc = vtk.vtkPolyDataNormals()
         self.dmc.SetInputConnection(smoother.GetOutputPort())
+        self.dmc.ComputePointNormalsOn()
+        self.dmc.ComputeCellNormalsOn()
+        self.dmc.Update()
 
     def compute_Curvature(self):
 
@@ -143,7 +149,11 @@ class VTK_Render_QT(qt.QFrame):
         self.color_function.RemoveAllPoints()
 
     def set_color_channel(self, value, R, G, B, mid = 0.5, sharp = 0.0):
-        self.color_function.AddRGBPoint(value*255, R, G, B,mid, sharp)
+
+        if self.flagCurvature:
+            self.color_function.AddRGBPoint(value, R, G, B, mid, sharp)
+        else:
+            self.color_function.AddRGBPoint(value*255, R, G, B,mid, sharp)
 
     def set_alpha_channel(self,value,alpha, mid = 0.5, sharp = 0.0):
         self.alpha_channel_function.AddPoint(value*255, alpha,mid, sharp)

@@ -597,6 +597,11 @@ class VolumeRenderingGUI(qt.QWidget):
         if self.flag_mesh:
             self.frame.MarchingCube(float(self.ThresholdMC.lineEdit.text()))
 
+            if bool(self.check_smooth.checkState()):
+                NbIter = int(self.SmoothIterNb.lineEdit.text())
+                relaxF= float(self.SmoothRelaxF.lineEdit.text())
+                self.frame.SmoothMesh(NbIter,relaxF)
+
             if self.flag_curvature_calculation:
                 self.frame.flagCurvature = True
                 self.frame.compute_Curvature()
@@ -605,10 +610,7 @@ class VolumeRenderingGUI(qt.QWidget):
 
 
 
-            if bool(self.check_smooth.checkState()):
-                NbIter = int(self.SmoothIterNb.lineEdit.text())
-                relaxF= float(self.SmoothRelaxF.lineEdit.text())
-                self.frame.SmoothMesh(NbIter,relaxF)
+
 
         del volumeToRender
 
