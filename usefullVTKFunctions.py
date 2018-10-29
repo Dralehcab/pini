@@ -63,6 +63,11 @@ class VTK_Render_QT(qt.QFrame):
         stlWriter.SetFileTypeToBinary()
         stlWriter.Write()
 
+    def save_mesh_color(self, path):
+        objWritter = vtk.vtkOBJExporter()
+        objWritter.SetRenderWindow(self.renWin)
+        objWritter.SetFileName(path + '.obj')
+        objWritter.Write()
 
     def SmoothMesh(self,nbIter,RelaxFactor):
 

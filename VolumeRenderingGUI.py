@@ -123,6 +123,9 @@ class VolumeRenderingGUI(qt.QWidget):
         self.saveButton = qt.QPushButton("Save Mesh")
         self.saveButton.setMaximumWidth(width_widget)
 
+        self.saveButton2 = qt.QPushButton("Save Mesh and Color")
+        self.saveButton2.setMaximumWidth(width_widget)
+
         self.compute_Distance = qt.QCheckBox("Compute Distance Map")
         self.compute_Curvature = qt.QCheckBox("Compute Curvature Map")
 
@@ -231,12 +234,14 @@ class VolumeRenderingGUI(qt.QWidget):
         self.mainLayout.addWidget(self.LabelOpa,25,2)
         self.mainLayout.addWidget(self.sliderOpa,26,2)
         self.mainLayout.addWidget(self.saveButton, 27, 2)
-        self.mainLayout.addWidget(self.renderButton,28,2)
+        self.mainLayout.addWidget(self.saveButton2, 28, 2)
+        self.mainLayout.addWidget(self.renderButton,29,2)
 
         self.setLayout(self.mainLayout)
 
         qt.QObject.connect(self.renderButton, qt.SIGNAL("clicked()"), self._render)
         qt.QObject.connect(self.saveButton, qt.SIGNAL("clicked()"), self._save)
+        qt.QObject.connect(self.saveButton2, qt.SIGNAL("clicked()"), self._save2)
 
     def check_parameters_files(self):
         source_file_color = open('./VTK_parameters/history', "r")
@@ -685,4 +690,9 @@ class VolumeRenderingGUI(qt.QWidget):
     def _save(self):
 
         self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Mesh ", "/")
+        self.frame.save_mesh(self.resultFileName)
+
+    def _save2(self):
+
+        self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Mesh and Color ", "/")
         self.frame.save_mesh(self.resultFileName)
