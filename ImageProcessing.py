@@ -1379,15 +1379,21 @@ def recursiveGauss(vol,sigma):
 
     return imageFromITKToNumpy(ITK_Vol)
 
-def median(vol,radius):
+def median(vol,radius,flag_2D):
+    if flag_2D ==0 :
+        ITK_Vol = imageFromNumpyToITK(vol)
+        med = sitk.MedianImageFilter()
+        print radius
+        med.SetRadius(radius)
+        ITK_Vol = med.Execute(ITK_Vol)
+        Vol = imageFromITKToNumpy(ITK_Vol)
+    else:
 
-    ITK_Vol = imageFromNumpyToITK(vol)
-    med = sitk.MedianImageFilter()
-    print radius
-    med.SetRadius(radius)
-    ITK_Vol = med.Execute(ITK_Vol)
+        Vol = np.zeros((vol.shape[0],vol.shape[1],vol.shape[2]))
+        for z in range(0,vol.shape[0]):
+            Vol[z,:,:] = ndimage.median_filter( vol[z,:,:], 3)
 
-    return imageFromITKToNumpy(ITK_Vol)
+    return Vol
 
 def sigmo(vol,alpha,beta):
 

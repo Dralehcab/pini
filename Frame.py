@@ -307,8 +307,12 @@ class Frame(qt.QWidget):
             self.connect(self.matGUI.startImporting, qt.SIGNAL("clicked()"),self._startLoadingMat)
         elif self.inputFiles[0].endswith('.nrrd'):
 
-            data, xxx = nrrd.read(self.inputFiles[0])
-            self.addImage( self.inputFiles[0],data)
+            data,xxxx = nrrd.read(self.inputFiles[0])
+            data = np.array(data)
+            print data.shape
+            print xxxx
+
+            self.addImage( self.inputFiles[0],np.swapaxes(data,0,1))
             
         elif self.inputFiles[0].endswith('.nii'):
             
@@ -1223,6 +1227,10 @@ class Frame(qt.QWidget):
         self.filterButton = qt.QPushButton("Filter")
         self.radius= LabelEditAndButton(True, "Radius : ", True, str(2.0), False)
 
+        self.flag2d = qt.QComboBox()
+        self.flag2d.addItem("2D")
+        self.flag2d.addItem("3D")
+
         self.radius.setMaximumWidth(250)
 
         qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_median_Function)
@@ -1230,15 +1238,20 @@ class Frame(qt.QWidget):
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.radius)
         self.buttonLayout.addWidget(self.filterButton)
+        self.buttonLayout.addWidget(self.flag2d)
         self.setLayout(self.mainLayout)
 
     def filter_median_Function(self):
 
         inputDataToSeg = self.Data_list[self.imageSelection.currentRow()]
-
         radius = float(str(self.radius.lineEdit.text()))
 
-        ImageOut = IP.median(np.copy(inputDataToSeg),int(radius))
+        if self.flag2d.currentIndex() == 0:
+            flag2d = True
+        else:
+            flag2d = False
+
+        ImageOut = IP.median(np.copy(inputDataToSeg),int(radius),flag2d)
         self.addImage( "F_median" + str(radius),ImageOut)
         self.filter_median_GUI()
 
