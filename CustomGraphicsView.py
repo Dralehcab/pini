@@ -2,6 +2,9 @@ import PyMcaQt as qt
 
 
 class CustomGraphicsView(qt.QGraphicsView):
+
+    CustomGraphicsViewEvent = qt.pyqtSignal(dict)
+
     def __init__(self, scene, parent):
         
         '''
@@ -15,6 +18,7 @@ class CustomGraphicsView(qt.QGraphicsView):
         #self.setRenderHints(qt.QPainter.Antialiasing | qt.QPainter.SmoothPixmapTransform);
         self.zoomScale = 1
         self.FlagWheellEvent = True
+
 
     def mousePressEvent(self, event):
 
@@ -38,7 +42,9 @@ class CustomGraphicsView(qt.QGraphicsView):
             ddict['x'] = clickPosition.x()
             ddict['y'] = clickPosition.y()
 
-        self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+
+        self.CustomGraphicsViewEvent.emit(ddict)
+        #self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
 
         return qt.QGraphicsView.mousePressEvent(self, event)
 
@@ -53,7 +59,8 @@ class CustomGraphicsView(qt.QGraphicsView):
             ddict['x'] = clickPosition.x()
             ddict['y'] = clickPosition.y()
 
-            self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+            #self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+            self.CustomGraphicsViewEvent.emit(ddict)
 
         return qt.QGraphicsView.mouseMoveEvent(self, event) # <-- added this line.
 

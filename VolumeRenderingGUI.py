@@ -62,9 +62,10 @@ class VolumeRenderingGUI(qt.QWidget):
         -------------------------------------"""
 
         self.color_TitleAndIcons = TitleAndIcones(True,"Color Table",True, './Icones/save.png','./Icones/saveas.png','./Icones/load.png')
-        self.connect(self.color_TitleAndIcons.save,qt.SIGNAL("clicked()"),self._buttonColorSavePushed)
-        self.connect(self.color_TitleAndIcons.saveas,qt.SIGNAL("clicked()"),self._buttonColorSaveasPushed)
-        self.connect(self.color_TitleAndIcons.load,qt.SIGNAL("clicked()"),self._buttonColorLoadPushed)
+
+        self.color_TitleAndIcons.save.clicked.connect(self._buttonColorSavePushed)
+        self.color_TitleAndIcons.saveas.clicked.connect(self._buttonColorSaveasPushed)
+        self.color_TitleAndIcons.load.clicked.connect(self._buttonColorLoadPushed)
 
         self.colorCoef = qt.QTableWidget(nb_row,6)
         self.colorCoef.verticalHeader().hide()
@@ -88,9 +89,10 @@ class VolumeRenderingGUI(qt.QWidget):
         -------------------------------------"""
 
         self.alpha_TitleAndIcons = TitleAndIcones(True,"Alpha Table",True, './Icones/save.png','./Icones/saveas.png','./Icones/load.png')
-        self.connect(self.alpha_TitleAndIcons.save,qt.SIGNAL("clicked()"),self._buttonAlphaSavePushed)
-        self.connect(self.alpha_TitleAndIcons.saveas,qt.SIGNAL("clicked()"),self._buttonAlphaSaveasPushed)
-        self.connect(self.alpha_TitleAndIcons.load,qt.SIGNAL("clicked()"),self._buttonAlphaLoadPushed)
+
+        self.alpha_TitleAndIcons.save.clicked.connect(self._buttonAlphaSavePushed)
+        self.alpha_TitleAndIcons.saveas.clicked.connect(self._buttonAlphaSaveasPushed)
+        self.alpha_TitleAndIcons.load.clicked.connect(self._buttonAlphaLoadPushed)
 
         self.AlphaCoef = qt.QTableWidget(nb_row, 4)
         self.AlphaCoef.verticalHeader().hide()
@@ -113,9 +115,9 @@ class VolumeRenderingGUI(qt.QWidget):
         -------------------------------------"""
 
         self.parameters_TitleAndIcons = TitleAndIcones(True,"Volume Parameters",True, './Icones/save.png','./Icones/saveas.png','./Icones/load.png')
-        self.connect(self.parameters_TitleAndIcons.save,qt.SIGNAL("clicked()"),self._buttonParaSavePushed)
-        self.connect(self.parameters_TitleAndIcons.saveas,qt.SIGNAL("clicked()"),self._buttonParaSaveasPushed)
-        self.connect(self.parameters_TitleAndIcons.load,qt.SIGNAL("clicked()"),self._buttonParaLoadPushed)
+        self.parameters_TitleAndIcons.save.clicked.connect(self._buttonParaSavePushed)
+        self.parameters_TitleAndIcons.saveas.clicked.connect(self._buttonParaSaveasPushed)
+        self.parameters_TitleAndIcons.load.clicked.connect(self._buttonParaLoadPushed)
 
         self.renderButton = qt.QPushButton("Render")
         self.renderButton.setMaximumWidth(width_widget)
@@ -246,8 +248,8 @@ class VolumeRenderingGUI(qt.QWidget):
 
         self.setLayout(self.mainLayout)
 
-        qt.QObject.connect(self.renderButton, qt.SIGNAL("clicked()"), self._render)
-        qt.QObject.connect(self.saveButton, qt.SIGNAL("clicked()"), self._save)
+        self.renderButton.clicked.connect(self._render)
+        self.saveButton.clicked.connect(self._save)
 
     def check_parameters_files(self):
         source_file_color = open('./VTK_parameters/history', "r")
@@ -608,14 +610,15 @@ class VolumeRenderingGUI(qt.QWidget):
         if self.flag_mesh:
             self.frame.MarchingCube(float(self.ThresholdMC.lineEdit.text()))
 
+
+            if bool(self.check_decim.checkState()):
+                Reduction = float(self.DecimageReduc.lineEdit.text())/100.0
+                self.frame.DecimateMesh(Reduction)
+
             if bool(self.check_smooth.checkState()):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())
                 relaxF= float(self.SmoothRelaxF.lineEdit.text())
                 self.frame.SmoothMesh(NbIter,relaxF)
-
-            if bool(self.check_decim.checkState()):
-                Reduction = float(self.DecimageReduc.lineEdit.text())/100.0
-                self.frame.DecimateMesh(NbIter,Reduction)
 
             if self.flag_curvature_calculation:
                 self.frame.flagCurvature = True

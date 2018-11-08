@@ -11,6 +11,11 @@ from CustomGraphicsView import CustomGraphicsView
 
 class SliceVisualizer(qt.QWidget):
 
+    clickedOnVizualizer = qt.pyqtSignal(dict)
+    MovedOnVizualizer = qt.pyqtSignal(dict)
+    movedOnVizualizer = qt.pyqtSignal(dict)
+    releasedOnVizualizer = qt.pyqtSignal(dict)
+
     def __init__(self, planeSection, parent=None):
         qt.QWidget.__init__(self, parent)
 
@@ -24,9 +29,12 @@ class SliceVisualizer(qt.QWidget):
 
         self.flagFirstCircle = True
 
-        self.connect(self.view, qt.SIGNAL("CustomGraphicsViewEvent"), self.clickedOnView)
-        self.connect(self.view,qt.SIGNAL("CustomGraphicsViewEvent"),self.mouseMoved)
-        self.connect(self.sliceSlider.slider, qt.SIGNAL("valueChanged(int)"), self._changeSlice)
+        #self.connect(self.view, qt.SIGNAL("CustomGraphicsViewEvent"), self.clickedOnView)
+        #self.connect(self.view,qt.SIGNAL("CustomGraphicsViewEvent"),self.mouseMoved)
+        #self.connect(self.sliceSlider.slider, qt.SIGNAL("valueChanged(int)"), self._changeSlice)
+        self.view.CustomGraphicsViewEvent.connect(self.clickedOnView)
+        self.view.CustomGraphicsViewEvent.connect(self.mouseMoved)
+        self.sliceSlider.slider.valueChanged.connect(self._changeSlice)
 
         self.flagAlpha = False
         
@@ -160,7 +168,7 @@ class SliceVisualizer(qt.QWidget):
         self.data[self.data >= 255] = 255
         self.data[self.data <= 0] = 0
         self.data = np.array(self.data, dtype=np.uint8)
-        print self.data
+
         if self.flagAlpha :
             self.dataAlpha = 255 * (self.sliceAlpha - self.minAlpha) / (self.maxAlpha - self.minAlpha)
             self.dataAlpha[self.dataAlpha >= 255] = 255
@@ -268,8 +276,7 @@ class SliceVisualizer(qt.QWidget):
                     self.colortableAlpha.append(qt.qRgba(R[i], G[i], B[i],int(alpha*255)))
         else:
             self.flagAlpha = False
-                
-            
+
 
     def clickedOnView(self, ddict):
         if ((ddict['event'] == 'MousePressed') or (ddict['event'] == 'RMousePressed')):
@@ -288,7 +295,9 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = y
                 ddict['z'] = z
-                self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
+
+                #self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
+                self.clickedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 1):
                 z = self.sliceSlider.value()
@@ -296,7 +305,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = z
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
+                self.clickedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 2):
                 z = self.sliceSlider.value()
@@ -304,8 +314,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = z
                 ddict['y'] = x
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
-
+                #self.emit(qt.SIGNAL("clickedOnVizualizer"), ddict)
+                self.clickedOnVizualizer.emit(ddict)
         if (ddict['event'] == 'MouseMoved'):
             x = int(ddict['x'])
             y = int(ddict['y'])
@@ -318,7 +328,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = y
                 ddict['z'] = z
-                self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                self.MovedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 1):
                 z = self.sliceSlider.value()
@@ -326,7 +337,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = z
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                self.MovedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 2):
                 z = self.sliceSlider.value()
@@ -334,7 +346,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = z
                 ddict['y'] = x
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("MovedOnVizualizer"), ddict)
+                self.MovedOnVizualizer.emit(ddict)
 
 
         if (ddict['event'] == 'MouseReleased'):
@@ -349,7 +362,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = y
                 ddict['z'] = z
-                self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                self.releasedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 1):
                 z = self.sliceSlider.value()
@@ -357,7 +371,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = z
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                self.releasedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 2):
                 z = self.sliceSlider.value()
@@ -365,7 +380,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = z
                 ddict['y'] = x
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("releasedOnVizualizer"), ddict)
+                self.releasedOnVizualizer.emit(ddict)
 
     def mouseMoved(self,ddict):
         if (ddict['event'] == 'MouseMoved'):
@@ -381,7 +397,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = y
                 ddict['z'] = z
-                self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                self.movedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 1):
                 z = self.sliceSlider.value()
@@ -389,7 +406,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = x
                 ddict['y'] = z
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                self.movedOnVizualizer.emit(ddict)
 
             if (self.currentPlaneSection == 2):
                 z = self.sliceSlider.value()
@@ -397,7 +415,8 @@ class SliceVisualizer(qt.QWidget):
                 ddict['x'] = z
                 ddict['y'] = x
                 ddict['z'] = y
-                self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                #self.emit(qt.SIGNAL("movedOnVizualizer"), ddict)
+                self.movedOnVizualizer.emit(ddict)
 
     def drawEllipse(self,x,y,r):
 
@@ -480,6 +499,9 @@ class SliceVisualizer(qt.QWidget):
 
 
 class Interactor3D(qt.QWidget):
+
+    CustomGraphicsViewEvent = qt.pyqtSignal()
+
     def __init__(self, parent=None):
         qt.QWidget.__init__(self, parent)
 
@@ -514,24 +536,41 @@ class Interactor3D(qt.QWidget):
         self.toolBar.doubleSlider.sigDoubleSliderValueChanged.connect( self.coronalWidget._doubleSliderValueChanged)
         self.toolBar.doubleSlider.sigDoubleSliderValueChanged.connect( self.sagittalWidget._doubleSliderValueChanged)
 
-        qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.axialWidget.view.autofit)
-        qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.coronalWidget.view.autofit)
-        qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.sagittalWidget.view.autofit)
+        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.axialWidget.view.autofit)
+        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.coronalWidget.view.autofit)
+        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.sagittalWidget.view.autofit)
 
-        qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToRuberband)
-        qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.coronalWidget.changeSelectorToRuberband)
-        qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.sagittalWidget.changeSelectorToRuberband)
+        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToRuberband)
+        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.coronalWidget.changeSelectorToRuberband)
+        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.sagittalWidget.changeSelectorToRuberband)
 
-        qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.axialWidget.changeSelectorToCircle)
-        qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToCircle)
-        qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToCircle)
+        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.axialWidget.changeSelectorToCircle)
+        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToCircle)
+        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToCircle)
 
-        qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToPointer)
-        qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToPointer)
-        qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToPointer)
+        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToPointer)
+        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToPointer)
+        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToPointer)
 
-        self.connect(self.toolBar.colorChoice, qt.SIGNAL("currentIndexChanged(int)"), self._colorMapChanged)
+        self.toolBar.zoomAutoAction.triggered.connect(self.axialWidget.view.autofit)
+        self.toolBar.zoomAutoAction.triggered.connect( self.coronalWidget.view.autofit)
+        self.toolBar.zoomAutoAction.triggered.connect(self.sagittalWidget.view.autofit)
 
+        self.toolBar.zone1Action.triggered.connect(self.axialWidget.changeSelectorToRuberband)
+        self.toolBar.zone1Action.triggered.connect(self.coronalWidget.changeSelectorToRuberband)
+        self.toolBar.zone1Action.triggered.connect(self.sagittalWidget.changeSelectorToRuberband)
+
+        self.toolBar.drawingAction.triggered.connect(self.axialWidget.changeSelectorToCircle)
+        self.toolBar.drawingAction.triggered.connect(self.coronalWidget.changeSelectorToCircle)
+        self.toolBar.drawingAction.triggered.connect(self.sagittalWidget.changeSelectorToCircle)
+
+        self.toolBar.pointerAction.triggered.connect(self.axialWidget.changeSelectorToPointer)
+        self.toolBar.pointerAction.triggered.connect(self.coronalWidget.changeSelectorToPointer)
+        self.toolBar.pointerAction.triggered.connect(self.sagittalWidget.changeSelectorToPointer)
+
+        #self.connect(self.toolBar.colorChoice, qt.SIGNAL("currentIndexChanged(int)"), self._colorMapChanged)
+
+        self.toolBar.colorChoice.currentIndexChanged.connect(self._colorMapChanged)
         self.setLayout(layout)
 
     def _setDataVolume(self, dataVolume, minValue = -1, maxValue = -1):
@@ -590,7 +629,8 @@ class Interactor3D(qt.QWidget):
         ddict['x'] = x
         ddict['y'] = y
         ddict['z'] = z
-        self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+        #self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+        self.CustomGraphicsViewEvent.emit(ddict)
 
     def drawRectangleOnThreePlanes(self,x1,x2,y1,y2,z1,z2):
 

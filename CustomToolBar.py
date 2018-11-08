@@ -16,31 +16,37 @@ class CustomToolBar(qt.QToolBar):
         self.zoomAutoAction.setCheckable(False)
         self.zoomAutoAction.setChecked(False)
         self.zoomActive = False
-        qt.QObject.connect(self.zoomAutoAction, qt.SIGNAL("triggered()"), self.zoomAutoPushed)
+
+        self.zoomAutoAction.triggered.connect(self.zoomAutoPushed)
+        #qt.connect(self.zoomAutoAction, qt.SIGNAL("triggered()"), self.zoomAutoPushed)
 
         self.zone1Action = qt.QAction(qt.QIcon('Icones/zone.png'), '&ZoneSelection', self)
         self.zone1Action.setStatusTip('Select Zone')
         self.zone1Action.setCheckable(True)
         self.zone1Action.setChecked(False)
-        qt.QObject.connect(self.zone1Action, qt.SIGNAL("triggered()"), self.zone1Selected)
+        self.zone1Action.triggered.connect(self.zone1Selected)
+        #qt.QObject.connect(self.zone1Action, qt.SIGNAL("triggered()"), self.zone1Selected)
 
         self.pointerAction = qt.QAction(qt.QIcon('Icones/cursor.png'), '&PointerSelection', self)
         self.pointerAction.setStatusTip('Select Pointer')
         self.pointerAction.setCheckable(True)
         self.pointerAction.setChecked(True)
-        qt.QObject.connect(self.pointerAction, qt.SIGNAL("triggered()"), self.pointerSelected)
+        self.pointerAction.triggered.connect(self.pointerSelected)
+        #qt.QObject.connect(self.pointerAction, qt.SIGNAL("triggered()"), self.pointerSelected)
 
         self.drawingAction = qt.QAction(qt.QIcon('Icones/circle18.png'), '&DrawingSelection', self)
         self.drawingAction.setStatusTip('Select Drawing')
         self.drawingAction.setCheckable(True)
         self.drawingAction.setChecked(False)
-        qt.QObject.connect(self.drawingAction, qt.SIGNAL("triggered()"), self.drawingSelected)
+        self.drawingAction.triggered.connect(self.drawingSelected)
+        #qt.QObject.connect(self.drawingAction, qt.SIGNAL("triggered()"), self.drawingSelected)
 
         self.polygonAction = qt.QAction(qt.QIcon('Icones/polygon.png'), '&PolygonSelection', self)
         self.polygonAction.setStatusTip('Select Polygone')
         self.polygonAction.setCheckable(True)
         self.polygonAction.setChecked(False)
-        qt.QObject.connect(self.polygonAction, qt.SIGNAL("triggered()"), self.polygonSelected)
+        self.polygonAction.triggered.connect(self.polygonSelected)
+        #qt.QObject.connect(self.polygonAction, qt.SIGNAL("triggered()"), self.polygonSelected)
 
         self.pointRemoveAction = qt.QAction(qt.QIcon('Icones/remove.png'), '&DeletePoint', self)
         self.pointRemoveAction.setStatusTip('remove Point')

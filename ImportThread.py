@@ -12,6 +12,8 @@ from ImageReader import ImageReader
 
 class ImportThread(qt.QThread):
 
+    Progress = qt.pyqtSignal(int)
+
     def __init__(self,files,parent):
 
         qt.QThread.__init__(self, parent)
@@ -41,7 +43,8 @@ class ImportThread(qt.QThread):
                 self.inputData[i, :, :] = data[:,:,0]
 
             i += 1
-            self.emit(qt.SIGNAL("Progress"), i)
+
+            self.Progress.emit(i)
 
 
 class ImportNo():

@@ -37,7 +37,7 @@ class VTK_Render_QT(qt.QFrame):
         return vol
 
     def MarchingCube(self,thresholdValue):
-
+        print 'Thresh'
         thresholdValue = float((255.0 * (thresholdValue - self.minValue)) / (self.maxValue - self.minValue))
 
         threshold = vtk.vtkImageThreshold()
@@ -49,8 +49,9 @@ class VTK_Render_QT(qt.QFrame):
         threshold.SetOutValue(1)  # set all values above 400 to 1
         threshold.Update()
 
-        print 'Thresh'
-        self.dmc = vtk.vtkMarchingCubes()
+        print('Meshing')
+        #self.dmc = vtk.vtkMarchingCubes()
+        self.dmc = vtk.vtkFlyingEdges3D()
         self.dmc.SetInputConnection(threshold.GetOutputPort())
         self.dmc.GenerateValues(1, 1, 1)
         self.dmc.Update()
@@ -64,7 +65,7 @@ class VTK_Render_QT(qt.QFrame):
         stlWriter.Write()
 
     def SmoothMesh(self,nbIter,RelaxFactor):
-
+        print("Smoother")
         smoother = vtk.vtkSmoothPolyDataFilter()
         smoother.SetInputConnection(self.dmc.GetOutputPort())
         smoother.SetNumberOfIterations(nbIter)
@@ -74,29 +75,21 @@ class VTK_Render_QT(qt.QFrame):
 
         self.dmc = vtk.vtkPolyDataNormals()
         self.dmc.SetInputConnection(smoother.GetOutputPort())
-        self.dmc.ComputePointNormalsOn()
-        self.dmc.ComputeCellNormalsOn()
         self.dmc.Update()
 
     def DecimateMesh(self,targeReduction):
 
-        print("Before decimation\n"
-              "-----------------\n"
-              "There are " + str(self.dmc.GetNumberOfPoints()) + "points.\n"
-              "There are " + str(self.dmc.GetNumberOfPolys()) + "polygons.\n")
+        print("Decimate")
 
         decimate = vtk.vtkDecimatePro()
         decimate.SetInputConnection(self.dmc.GetOutputPort())
         decimate.SetTargetReduction(targeReduction)
         decimate.Update()
 
-        self.dmc = vtk.vtkPolyData()
+        self.dmc = vtk.vtkPolyDataNormals()
         self.dmc.SetInputConnection(decimate.GetOutputPort())
+        self.dmc.Update()
 
-        print("After decimation \n"
-              "-----------------\n"
-              "There are " + str(self.dmc.GetNumberOfPoints()) + "points.\n"
-              "There are " + str(self.dmc.GetNumberOfPolys()) + "polygons.\n")
 
 
     def compute_Curvature(self):

@@ -14,7 +14,8 @@ class SliderAndLabel(qt.QWidget):
         self.layout.addWidget(self.slider)
         self.layout.addWidget(self.Label)
         self._changeLabel()
-        self.connect(self.slider,qt.SIGNAL("valueChanged(int)"),self._changeLabel)
+        #self.connect(self.slider,qt.SIGNAL("valueChanged(int)"),self._changeLabel)
+        self.slider.valueChanged.connect(self._changeLabel)
         self.setLayout(self.layout)
 
     def _changeLabel(self):
@@ -45,7 +46,7 @@ class SliderAndLabelSpecificScale(qt.QWidget):
         self.layout.addWidget(self.slider)
         self.layout.addWidget(self.Label)
         self._changeLabel()
-        self.connect(self.slider,qt.SIGNAL("valueChanged(int)"),self._changeLabel)
+        self.slider.valueChanged.connect(self._changeLabel)
         self.setLayout(self.layout)
 
     def _changeLabel(self):

@@ -4,9 +4,8 @@ Created on Wed Nov 30 14:26:20 2016
 
 @author: broche
 
-
-Je test le GIT
 """
+
 
 import os
 import numpy as np
@@ -91,7 +90,8 @@ class Frame(qt.QWidget):
         self.image3DWidget = Interactor3D(self)
         self.imageSelection = qt.QListWidget(self)
         self.imageSelection.setContextMenuPolicy(qt.Qt.CustomContextMenu)
-        self.connect(self.imageSelection, qt.SIGNAL("customContextMenuRequested(QPoint)"),  self.listItemRightClicked)
+        #self.connect(self.imageSelection, qt.SIGNAL("customContextMenuRequested(QPoint)"),  self.listItemRightClicked)
+        self.imageSelection.customContextMenuRequested.connect(self.listItemRightClicked)
         self.progressBar=qt.QProgressBar(self)
         self.mouseDisplay = LabelEditAndButton(True, "", False, "", False, "")
 
@@ -105,25 +105,26 @@ class Frame(qt.QWidget):
 
         """Signals"""
 
-        qt.QObject.connect(self.imageSelection, qt.SIGNAL("currentRowChanged(int)"), self._dataToShowChanged)
-        self.connect(self.image3DWidget.axialWidget, qt.SIGNAL("MovedOnVizualizer"),self._moved)
-        self.connect(self.image3DWidget.coronalWidget, qt.SIGNAL("MovedOnVizualizer"),self._moved)
-        self.connect(self.image3DWidget.sagittalWidget, qt.SIGNAL("MovedOnVizualizer"),self._moved)
 
-        self.connect(self.image3DWidget.axialWidget, qt.SIGNAL("clickedOnVizualizer"),self._cliked)
-        self.connect(self.image3DWidget.coronalWidget, qt.SIGNAL("clickedOnVizualizer"),self._cliked)
-        self.connect(self.image3DWidget.sagittalWidget, qt.SIGNAL("clickedOnVizualizer"),self._cliked)
+        self.imageSelection.currentRowChanged.connect(self._dataToShowChanged)
+        self.image3DWidget.axialWidget.MovedOnVizualizer.connect(self._moved)
+        self.image3DWidget.coronalWidget.MovedOnVizualizer.connect(self._moved)
+        self.image3DWidget.sagittalWidget.MovedOnVizualizer.connect(self._moved)
 
-        self.connect(self.image3DWidget.axialWidget, qt.SIGNAL("releasedOnVizualizer"),self._released)
-        self.connect(self.image3DWidget.coronalWidget, qt.SIGNAL("releasedOnVizualizer"),self._released)
-        self.connect(self.image3DWidget.sagittalWidget, qt.SIGNAL("releasedOnVizualizer"),self._released)
+        self.image3DWidget.axialWidget.clickedOnVizualizer.connect(self._cliked)
+        self.image3DWidget.coronalWidget.clickedOnVizualizer.connect(self._cliked)
+        self.image3DWidget.sagittalWidget.clickedOnVizualizer.connect(self._cliked)
 
-        self.connect(self.image3DWidget.toolBar.radius.lineEdit,qt.SIGNAL("textChanged(QString)"),self._changeRadius)
+        self.image3DWidget.axialWidget.releasedOnVizualizer.connect(self._released)
+        self.image3DWidget.coronalWidget.releasedOnVizualizer.connect(self._released)
+        self.image3DWidget.sagittalWidget.releasedOnVizualizer.connect(self._released)
 
-        qt.QObject.connect(self.image3DWidget.toolBar.pointRemoveAction, qt.SIGNAL("triggered()"), self._RemoveItems)
+        self.image3DWidget.toolBar.radius.lineEdit.textChanged.connect(self._changeRadius)
+
+        self.image3DWidget.toolBar.pointRemoveAction.triggered.connect(self._RemoveItems)
 
 
-        self.connect(self.tabWidget,qt.SIGNAL("currentChanged(int)"),self._tabChanged)
+        self.tabWidget.currentChanged.connect(self._tabChanged)
 
         """Placing widgets"""
 
@@ -153,7 +154,7 @@ class Frame(qt.QWidget):
     def listItemRightClicked(self, QPos):
         self.listMenu= qt.QMenu()
         remove_item = self.listMenu.addAction("Delete")
-        self.connect(remove_item, qt.SIGNAL("triggered()"), self.removeImage)
+        remove_item.triggered.connect( self.removeImage)
         parentPosition = self.imageSelection.mapToGlobal(qt.QPoint(0, 0))
         self.listMenu.move(parentPosition + QPos)
         self.listMenu.show()
@@ -175,13 +176,14 @@ class Frame(qt.QWidget):
 
 
     def _load(self, inputFolder = -1) :
-        if inputFolder == -1:
+
+        if inputFolder == False:
             self.inputFiles = qt.QFileDialog.getOpenFileNames(self, "Select one or more files to open", self.main_path )
             if not self.inputFiles:
                 return 0
         else:
 
-            inputFolder += '/Paganin/EDF/'
+            inputFolder += "/Paganin/EDF/"
             self.inputFiles = [f for f in os.listdir(inputFolder) if os.path.isfile(os.path.join(inputFolder, f))]
             self.inputFiles.sort()
 
@@ -190,9 +192,10 @@ class Frame(qt.QWidget):
 
 
         if len(self.inputFiles) != 0:
-            self.Name_list.append(self.inputFiles[0].split('/')[-1])
 
-        pathXml = '/'.join(self.inputFiles[0].split('/')[:-1])+'/ImageInfo.xml'
+            self.Name_list.append(os.path.basename(self.inputFiles[0][0]))
+
+        pathXml = path + "/ImageInfo.xml"
 
         if os.path.isfile(pathXml):
             tree = ET.parse(pathXml)
@@ -211,8 +214,8 @@ class Frame(qt.QWidget):
         self.progressBar.setRange(0,len(self.inputFiles)-1)
         self.importThread=ImportThread(self.inputFiles,self)
         print self.Pixel_size[-1]
-        self.connect(self.importThread,qt.SIGNAL("Progress"),self.setProgressBar)
-        self.connect(self.importThread,qt.SIGNAL("finished()"),self.setData)
+        self.importThread.Progress.connect(self.setProgressBar)
+        self.importThread.finished.connect(self.setData)
 
         self.importThread.start()
 
@@ -244,7 +247,7 @@ class Frame(qt.QWidget):
         self.inputDirectories.sort()
         self.foldersToOpen = DicomReaderGUI(self.inputDirectories)
 
-        self.connect(self.foldersToOpen.startImporting, qt.SIGNAL("clicked()"),self._startLoadingFolders)
+        self.foldersToOpen.startImporting.clicked.connect(self._startLoadingFolders)
         self.foldersToOpen.show()
 
 
@@ -304,7 +307,7 @@ class Frame(qt.QWidget):
             self.matClass = MatReader(self.inputFiles[0])
             self.matGUI = MatReaderGUI(self.matClass.getListScan())
             self.buttonLayout.addWidget(self.matGUI)
-            self.connect(self.matGUI.startImporting, qt.SIGNAL("clicked()"),self._startLoadingMat)
+            self.matGUI.startImporting.clicked.connect(self._startLoadingMat)
         elif self.inputFiles[0].endswith('.nrrd'):
 
             data,xxxx = nrrd.read(self.inputFiles[0])
@@ -367,7 +370,7 @@ class Frame(qt.QWidget):
                     self.patientName =  self.dicomClass.patientName
                     self.parent.setWindowTitle(self.patientName)
     
-                    self.connect(self.dicomGUI.startImporting, qt.SIGNAL("clicked()"),self._startLoadingDicom)
+                    self.dicomGUI.startImporting.clicked.connect(self._startLoadingDicom)
                     self.buttonLayout.addWidget(self.dicomGUI)
     
     
@@ -494,7 +497,7 @@ class Frame(qt.QWidget):
                 nrrd.write(self.resultFileName+'.nrrd',np.swapaxes(dataToStore, 0 ,2))
             else:
                 self.exportThread = ExportThread(self.resultFileName, dataToStore, extension, self)
-                self.connect(self.exportThread, qt.SIGNAL("Progress"), self.setProgressBar)
+                self.exportThread.Progress.connect(self.setProgressBar)
                 self.exportThread.start()
 
 
@@ -915,7 +918,7 @@ class Frame(qt.QWidget):
         self.smoothButton = qt.QPushButton("Interpolating")
 
 
-        qt.QObject.connect(self.smoothButton, qt.SIGNAL("clicked()"), self._interpolateContour)
+        self.smoothButton.clicked.connect( self._interpolateContour)
 
         self.smoothButton.setMaximumWidth(250)
 
@@ -947,7 +950,7 @@ class Frame(qt.QWidget):
         self.nbIter = LabelEditAndButton(True, "Smoothing Number of Iterations : ", True, str(20), False)
         self.InterF = LabelEditAndButton(True, "OutputImage Interpolation Factor: ", True, str(4), False)
 
-        qt.QObject.connect(self.smoothButton, qt.SIGNAL("clicked()"), self._interpolateMask)
+        self.smoothButton.clicked.connect( self._interpolateMask)
 
         self.smoothButton.setMaximumWidth(250)
         self.nbIter.setMaximumWidth(250)
@@ -978,7 +981,7 @@ class Frame(qt.QWidget):
         self.alpha = LabelEditAndButton(True, "Alpha : ", True, str(3.0), False)
         self.block = LabelEditAndButton(True, "Block : ", True, str(2.0), False)
         self.filterButton = qt.QPushButton("Filter")
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.correct_ring1)
+        self.filterButton.clicked.connect(self.correct_ring1)
 
         self.alpha.setMaximumWidth(250)
         self.block.setMaximumWidth(250)
@@ -1008,7 +1011,7 @@ class Frame(qt.QWidget):
         self.ColorMapB.addItem('GrayLevel')
         self.ColorMapB.addItem('Jet')
 
-        qt.QObject.connect(self.addAlphaMap, qt.SIGNAL("clicked()"), self.add_alpha_map)
+        self.addAlphaMap.clicked.connect( self.add_alpha_map)
 
         self.minValue.setMaximumWidth(250)
         self.maxValue.setMaximumWidth(250)
@@ -1063,7 +1066,7 @@ class Frame(qt.QWidget):
         self.nbBin.setMaximumWidth(250)
         self.percentile.setMaximumWidth(250)
 
-        qt.QObject.connect(self.histoButton, qt.SIGNAL("clicked()"), self.histo_Function)
+        self.histoButton.clicked.connect(self.histo_Function)
 
         self.buttonLayout.addWidget(self.minBin)
         self.buttonLayout.addWidget(self.maxBin)
@@ -1133,7 +1136,7 @@ class Frame(qt.QWidget):
         self.iterLabel.setMaximumWidth(250)
         self.nbIter.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_anidiff_Function)
+        self.filterButton.clicked.connect( self.filter_anidiff_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.time_step)
@@ -1167,7 +1170,7 @@ class Frame(qt.QWidget):
 
         self.sigma.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_recursiveGauss_Function)
+        self.filterButton.clicked.connect(self.filter_recursiveGauss_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.sigma)
@@ -1197,7 +1200,7 @@ class Frame(qt.QWidget):
         self.alpha.setMaximumWidth(250)
         self.levels.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_WL)
+        self.filterButton.clicked.connect( self.filter_WL)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.waveletList)
@@ -1233,7 +1236,7 @@ class Frame(qt.QWidget):
 
         self.radius.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_median_Function)
+        self.filterButton.clicked.connect( self.filter_median_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.radius)
@@ -1263,7 +1266,7 @@ class Frame(qt.QWidget):
         self.varGauss = LabelEditAndButton(True, "Variance Gaussian:", True, str(3.0), False)
         self.maxErrorGauss = LabelEditAndButton(True, "Max Error Gaussian: ", True, str(0.01), False)
 
-        qt.QObject.connect(self.edgeButton, qt.SIGNAL("clicked()"), self.zero_Crossing_Function)
+        self.edgeButton.clicked.connect( self.zero_Crossing_Function)
 
         self.varGauss.setMaximumWidth(250)
         self.maxErrorGauss.setMaximumWidth(250)
@@ -1301,7 +1304,7 @@ class Frame(qt.QWidget):
         self.maxErrorGauss.setMaximumWidth(250)
         self.edgeButton.setMaximumWidth(250)
 
-        qt.QObject.connect(self.edgeButton, qt.SIGNAL("clicked()"), self.edge_Canny_Function)
+        self.edgeButton.clicked.connect( self.edge_Canny_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.varGauss)
@@ -1330,7 +1333,7 @@ class Frame(qt.QWidget):
 
         self.sigma.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_GradGauss_Function)
+        self.filterButton.clicked.connect( self.filter_GradGauss_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.sigma)
@@ -1366,7 +1369,7 @@ class Frame(qt.QWidget):
         self.alpha.setMaximumWidth(250)
         self.beta.setMaximumWidth(250)
 
-        qt.QObject.connect(self.filterButton, qt.SIGNAL("clicked()"), self.filter_Sigmo_Function)
+        self.filterButton.clicked.connect( self.filter_Sigmo_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.alpha)
@@ -1402,7 +1405,7 @@ class Frame(qt.QWidget):
         self.rg_mul.setMaximumWidth(250)
         self.rg_Iter.setMaximumWidth(250)
         self.flag_indep.setMaximumWidth(250)
-        qt.QObject.connect(self.segmentButtonrg, qt.SIGNAL("clicked()"), self.segment_rgc_Function)
+        self.segmentButtonrg.clicked.connect( self.segment_rgc_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.flag_indep)
@@ -1425,7 +1428,7 @@ class Frame(qt.QWidget):
         self.rg_tol_min.setMaximumWidth(250)
         self.rg_tol_max.setMaximumWidth(250)
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_rg_Function)
+        self.segmentButton.clicked.connect( self.segment_rg_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.rg_tol_min)
@@ -1559,7 +1562,7 @@ class Frame(qt.QWidget):
         self.segmentButton.setMaximumWidth(250)
         self.stopValue.setMaximumWidth(250)
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_fm_Function)
+        self.segmentButton.clicked.connect(self.segment_fm_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.stopValue)
@@ -1611,7 +1614,7 @@ class Frame(qt.QWidget):
         self.max_th.setMaximumWidth(250)
 
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_th_Function)
+        self.segmentButton.clicked.connect( self.segment_th_Function)
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.min_th)
@@ -1665,8 +1668,8 @@ class Frame(qt.QWidget):
         self.InitialLS.addItems(self.Name_list)
         self.EdgePotMap.addItems(self.Name_list)
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_sd_Function)
-        qt.QObject.connect(self.InitialLS, qt.SIGNAL("currentIndexChanged(int)"), self._radius)
+        self.segmentButton.clicked.connect( self.segment_sd_Function)
+        self.InitialLS.currentIndexChanged.connect( self._radius)
 
         self.buttonLayout.addWidget(self.label1)
         self.buttonLayout.addWidget(self.InitialLS)
@@ -1760,8 +1763,8 @@ class Frame(qt.QWidget):
         self.InitialLS.addItems(self.Name_list)
         self.EdgePotMap.addItems(self.Name_list)
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_geo_Function)
-        qt.QObject.connect(self.InitialLS, qt.SIGNAL("currentIndexChanged(int)"), self._radius)
+        self.segmentButton.clicked.connect( self.segment_geo_Function)
+        self.InitialLS.currentIndexChanged.connect(self._radius)
 
         self.buttonLayout.addWidget(self.label1)
         self.buttonLayout.addWidget(self.InitialLS)
@@ -1835,32 +1838,32 @@ class Frame(qt.QWidget):
         self.constante2 = LabelEditAndButton(False, "", True, "1", False)
         self.mathButton = qt.QPushButton("Compute")
 
-        self.Image1.addItems(".")
-        self.Image1.addItems(["Constant"])
+        self.Image1.addItem(".")
+        self.Image1.addItem("Constant")
         self.Image1.addItems(self.Name_list)
 
 
-        self.Image2.addItems(".")
-        self.Image2.addItems(["Constant"])
+        self.Image2.addItem(".")
+        self.Image2.addItem("Constant")
         self.Image2.addItems(self.Name_list)
 
-        self.Operator.addItems("+")
-        self.Operator.addItems("-")
-        self.Operator.addItems("x")
-        self.Operator.addItems("/")
-        self.Operator.addItems("^")
-        self.Operator.addItems("e")
-        self.Operator.addItems(["log"])
-        self.Operator.addItems(["log10"])
-        self.Operator.addItems(["&"])
+        self.Operator.addItem("+")
+        self.Operator.addItem("-")
+        self.Operator.addItem("x")
+        self.Operator.addItem("/")
+        self.Operator.addItem("^")
+        self.Operator.addItem("e")
+        self.Operator.addItem("log")
+        self.Operator.addItem("log10")
+        self.Operator.addItem("&")
 
         self.constante1.setFixedSize(100, 40)
 
         self.constante2.setFixedSize(100, 40)
 
-        qt.QObject.connect(self.Image1, qt.SIGNAL("currentIndexChanged(int)"), self._constante1)
-        qt.QObject.connect(self.Image2, qt.SIGNAL("currentIndexChanged(int)"), self._constante2)
-        qt.QObject.connect(self.mathButton, qt.SIGNAL("clicked()"), self.mathFunction)
+        self.Image1.currentIndexChanged.connect( self._constante1)
+        self.Image2.currentIndexChanged.connect( self._constante2)
+        self.mathButton.clicked.connect(self.mathFunction)
 
         self.buttonLayout.addWidget(self.Image1)
         self.buttonLayout.addWidget(self.constante1)
@@ -2223,7 +2226,7 @@ class Frame(qt.QWidget):
         self.yfactor = LabelEditAndButton(True, "Y", True, str(1), False)
         self.zfactor = LabelEditAndButton(True, "X", True, str(1), False)
 
-        qt.QObject.connect(self.resampleButton, qt.SIGNAL("clicked()"), self.resample_function)
+        self.resampleButton.clicked.connect(self.resample_function)
 
         self.resampleButton.setMaximumWidth(250)
         self.InterpolatorLabel.setMaximumWidth(250)
@@ -2251,7 +2254,7 @@ class Frame(qt.QWidget):
 
         self.kRotation = LabelEditAndButton(True, "Rotation", True, str(90), False)
 
-        qt.QObject.connect(self.resampleButton, qt.SIGNAL("clicked()"), self.rotation_function)
+        self.resampleButton.clicked.connect(self.rotation_function)
         
         self.kRotation.setMaximumWidth(250)
         self.resampleButton.setMaximumWidth(250)
@@ -2291,7 +2294,7 @@ class Frame(qt.QWidget):
         self.direction.addItem("Vertical")
         self.direction.addItem("Horizontal")
 
-        qt.QObject.connect(self.mozaicButton, qt.SIGNAL("clicked()"), self.mozaic_function)
+        self.mozaicButton.clicked.connect( self.mozaic_function)
 
         self.mozaicButton.setMaximumWidth(250)
         self.label1.setMaximumWidth(250)
@@ -2380,7 +2383,7 @@ class Frame(qt.QWidget):
         self.Im1.addItems(self.Name_list)
         self.Im2.addItems(self.Name_list)
 
-        qt.QObject.connect(self.stackButton, qt.SIGNAL("clicked()"), self.stack_Function)
+        self.stackButton.clicked.connect(self.stack_Function)
 
         self.buttonLayout.addWidget(self.label1)
         self.buttonLayout.addWidget(self.Im1)
@@ -2407,7 +2410,7 @@ class Frame(qt.QWidget):
         self.index_h.setMaximumWidth(250)
 
 
-        qt.QObject.connect(self.destackButton, qt.SIGNAL("clicked()"), self.destack_Function)
+        self.destackButton.clicked.connect(self.destack_Function)
 
         self.buttonLayout.addWidget(self.index_h)
         self.buttonLayout.addWidget(self.index_zmin)
@@ -2419,7 +2422,7 @@ class Frame(qt.QWidget):
         self.hide_all_button()
         self.MIButton = qt.QPushButton("Plot Line Intensity")
         self.MIButton.setMaximumWidth(250)
-        qt.QObject.connect(self.MIButton, qt.SIGNAL("clicked()"), self.followLine)
+        self.MIButton.clicked.connect( self.followLine)
         self.buttonLayout.addWidget(self.MIButton)
 
     def  _followMaxLineGUI(self):
@@ -2429,7 +2432,7 @@ class Frame(qt.QWidget):
         self.MIButton.setMaximumWidth(250)
         self.maxDistance.setMaximumWidth(250)
 
-        qt.QObject.connect(self.MIButton, qt.SIGNAL("clicked()"), self.followMaxLine)
+        self.MIButton.clicked.connect(self.followMaxLine)
         self.buttonLayout.addWidget(self.maxDistance)
         self.buttonLayout.addWidget(self.MIButton)
 
@@ -2605,7 +2608,7 @@ class Frame(qt.QWidget):
         self.endFrame.setMaximumWidth(250)
 
 
-        qt.QObject.connect(self.MIButton, qt.SIGNAL("clicked()"), self.MI_Function)
+        self.MIButton.clicked.connect(self.MI_Function)
 
 
 
@@ -2662,7 +2665,7 @@ class Frame(qt.QWidget):
         self.ImP.addItems(self.Name_list)
         self.ImFF.addItems(self.Name_list)
 
-        qt.QObject.connect(self.corButton, qt.SIGNAL("clicked()"), self.correct_ff_function)
+        self.corButton.connect.clicked( self.correct_ff_function)
 
         self.buttonLayout.addWidget(self.label1)
         self.buttonLayout.addWidget(self.ImP)
@@ -2714,7 +2717,7 @@ class Frame(qt.QWidget):
         self.ImF.addItems(self.Name_list)
         self.ImM.addItems(self.Name_list)
 
-        qt.QObject.connect(self.corButton, qt.SIGNAL("clicked()"), self.CORFFT_Function)
+        self.corButton.clicked.connect( self.CORFFT_Function)
 
 
         self.buttonLayout.addWidget(self.label1)
@@ -2757,7 +2760,7 @@ class Frame(qt.QWidget):
 
         self.WindowSize= LabelEditAndButton(True, "Window Size", True, "4", False)
         self.Overlap = LabelEditAndButton(True, "Overlap", True, "0.5", False)
-        qt.QObject.connect(self.ratioButton, qt.SIGNAL("clicked()"), self.study_maskRatio)
+        self.ratioButton.clicked.connect( self.study_maskRatio)
 
 
         self.ratioButton.setMaximumWidth(250)
@@ -2777,7 +2780,7 @@ class Frame(qt.QWidget):
 
         self.WindowSize= LabelEditAndButton(True, "Window Size", True, "4", False)
         self.Overlap = LabelEditAndButton(True, "Overlap", True, "0.5", False)
-        qt.QObject.connect(self.ratioButton, qt.SIGNAL("clicked()"), self.study_maskVolRatio)
+        self.ratioButton.clicked.connect(self.study_maskVolRatio)
 
 
         self.ratioButton.setMaximumWidth(250)
@@ -2831,14 +2834,14 @@ class Frame(qt.QWidget):
         self.Image.addItems(self.Name_list)
         self.kernelRadius.setFixedSize(250, 40)
 
-        qt.QObject.connect(self.morphoButton, qt.SIGNAL("clicked()"), self.morphoFunction)
-        qt.QObject.connect(self.checkErosion, qt.SIGNAL("stateChanged(int)"), self.Ero)
-        qt.QObject.connect(self.checkDilatation, qt.SIGNAL("stateChanged(int)"), self.Dil)
-        qt.QObject.connect(self.checkOpening, qt.SIGNAL("stateChanged(int)"), self.Open)
-        qt.QObject.connect(self.checkClosing, qt.SIGNAL("stateChanged(int)"), self.Closing)
-        qt.QObject.connect(self.checkFilling, qt.SIGNAL("stateChanged(int)"), self.Filling)
-        qt.QObject.connect(self.checkDistance, qt.SIGNAL("stateChanged(int)"), self.Distance)
-        qt.QObject.connect(self.checkSkeletton, qt.SIGNAL("stateChanged(int)"), self.Skeletton)
+        self.morphoButton.clicked.connect(self.morphoFunction)
+        self.checkErosion.stateChanged.connect(self.Ero)
+        self.checkDilatation.stateChanged.connect( self.Dil)
+        self.checkOpening.stateChanged.connect(self.Open)
+        self.checkClosing.stateChanged.connect(self.Closing)
+        self.checkFilling.stateChanged.connect(self.Filling)
+        self.checkDistance.stateChanged.connect(self.Distance)
+        self.checkSkeletton.stateChanged.connect(self.Skeletton)
 
 
 
@@ -2899,7 +2902,7 @@ class Frame(qt.QWidget):
     """ Registration """
     def _registration_GUI(self):
         self.optionRegisterW = RegisteringOption(self.Name_list)
-        qt.QObject.connect(self.optionRegisterW.startRegistering, qt.SIGNAL("clicked()"), self.lauchRegistering)
+        self.optionRegisterW.startRegistering.clicked.connect( self.lauchRegistering)
         self.optionRegisterW.show()
 
     def lauchRegistering(self,dicPar = -1):
@@ -2939,9 +2942,9 @@ class Frame(qt.QWidget):
         self.regThread= rT.registerThread(self.R,self)
 
         if not self.flagMacro:
-            self.connect(self.regThread,qt.SIGNAL("RegDone"),self.endRegister)
+            self.regThread.RegDone.connect(self.endRegister)
         else:
-            self.connect(self.regThread,qt.SIGNAL("RegDone"),self.endRegister2)
+            self.regThread.RegDone.connect(self.endRegister2)
 
         self.R.reg_method.AddCommand(sitk.sitkStartEvent, self.start_plot)
         self.R.reg_method.AddCommand(sitk.sitkMultiResolutionIterationEvent, self.update_multires_iterations)
@@ -3142,7 +3145,7 @@ class Frame(qt.QWidget):
         self.ImageJacob.addItems(self.Name_list)
 
 
-        qt.QObject.connect(self.ventiButton, qt.SIGNAL("clicked()"), self. studysVair)
+        self.ventiButton.clicked.connect( self. studysVair)
 
 
         self.ventiButton.setMaximumWidth(250)
@@ -3193,7 +3196,7 @@ class Frame(qt.QWidget):
         self.WindowSize= LabelEditAndButton(True, "Window Size", True, "4", False)
         self.Overlap = LabelEditAndButton(True, "Overlap", True, "0.5", False)
         self.t_step = LabelEditAndButton(True, "Time Step", True, "0.1", False)
-        qt.QObject.connect(self.ventiButton, qt.SIGNAL("clicked()"), self.studyVentilation)
+        self.ventiButton.clicked.connect( self.studyVentilation)
 
 
         self.ventiButton.setMaximumWidth(250)
@@ -3271,7 +3274,7 @@ class Frame(qt.QWidget):
 
         self.WindowSize= LabelEditAndButton(True, "Window Size", True, "4", False)
         self.Overlap = LabelEditAndButton(True, "Overlap", True, "0.5", False)
-        qt.QObject.connect(self.densityButton, qt.SIGNAL("clicked()"), self.study_density)
+        self.densityButton.clicked.connect(self.study_density)
 
 
         self.densityButton.setMaximumWidth(250)
@@ -3334,7 +3337,7 @@ class Frame(qt.QWidget):
 
 
         self.average_factor = LabelEditAndButton(True, "Average Factor:", True, "1", False)
-        qt.QObject.connect(self.macro1Button, qt.SIGNAL("clicked()"), self.macro1)
+        self.macro1Button.clicked.connect( self.macro1)
 
         self.tissueLabel.setMaximumWidth(250)
         self.contrastLabel.setMaximumWidth(250)
@@ -3378,7 +3381,7 @@ class Frame(qt.QWidget):
 
         self.macro5Button = qt.QPushButton("Start")
 
-        qt.QObject.connect(self.macro5Button, qt.SIGNAL("clicked()"), self.macro5)
+        self.macro5Button.clicked.connect( self.macro5)
 
         self.macro5Button.setMaximumWidth(250)
         self.pos1.setMaximumWidth(250)
@@ -3598,7 +3601,7 @@ class Frame(qt.QWidget):
         self.macro3Button.setMaximumWidth(250)
 
 
-        qt.QObject.connect(self.macro3Button, qt.SIGNAL("clicked()"), self.macro4)
+        self.macro3Button.clicked.connect( self.macro4)
         self.buttonLayout.addWidget( self.macro3Button)
 
     def macro4(self):
@@ -3660,7 +3663,7 @@ class Frame(qt.QWidget):
         self.hide_all_button()
         self.macro3ButtonSecond = qt.QPushButton("Continue")
         self.macro3ButtonSecond.setMaximumWidth(250)
-        qt.QObject.connect(self.macro3ButtonSecond, qt.SIGNAL("clicked()"), self.macro4Second)
+        self.macro3ButtonSecond.clicked.connect( self.macro4Second)
         self.buttonLayout.addWidget( self.macro3ButtonSecond)
 
 
@@ -3683,7 +3686,7 @@ class Frame(qt.QWidget):
         self.StandartDeviationFat.setMaximumWidth(250)
         self.macro3Button.setMaximumWidth(250)
 
-        qt.QObject.connect(self.macro3Button, qt.SIGNAL("clicked()"), self.macro3)
+        self.macro3Button.clicked.connect( self.macro3)
         self.buttonLayout.addWidget(self.StandartDeviationTissue)
         self.buttonLayout.addWidget(self.StandartDeviationFat)
 
@@ -4122,7 +4125,7 @@ class Frame(qt.QWidget):
         self.ResolutionReg.setMaximumWidth(250)
   
         self.startProcess =  qt.QPushButton('StartRegistration')
-        self.connect(self.startProcess ,qt.SIGNAL("clicked()"),self._buttonStartRegistration)
+        self.startProcess.clicked.connect(self._buttonStartRegistration)
 
 
         self.stepSize.setMaximumWidth(250)
@@ -4153,7 +4156,7 @@ class Frame(qt.QWidget):
         self.ImageInspi.addItems(self.Name_list)
         self.ImageExpi.addItems(self.Name_list)
         
-        self.connect(self.macro2Button ,qt.SIGNAL("clicked()"),self.macro2)
+        self.macro2Button.clicked.connect(self.macro2)
         
         self.InspiLabel.setMaximumWidth(250)
         self.ExpiLabel.setMaximumWidth(250)
@@ -4193,10 +4196,10 @@ class Frame(qt.QWidget):
             self.save=qt.QPushButton()
             self.save.setIcon(qt.QIcon(qt.QPixmap('./Icones/save.png')))
             self.save.setMaximumWidth(250)
-            self.connect(self.save,qt.SIGNAL("clicked()"),self._buttonSaveSeg)
+            self.save.clicked.connect(self._buttonSaveSeg)
             
             self.restartProcess =  qt.QPushButton('Restart Segmentation')
-            self.connect(self.restartProcess,qt.SIGNAL("clicked()"),self._buttonRestartSeg)
+            self.restartProcess.clicked.connect(self._buttonRestartSeg)
               
   
             self.stepSize = LabelEditAndButton(True, "Step Size", True, "10.0", False)
@@ -4208,7 +4211,7 @@ class Frame(qt.QWidget):
             self.ResolutionReg.setMaximumWidth(250)
   
             self.startProcess =  qt.QPushButton('StartRegistration')
-            self.connect(self.startProcess ,qt.SIGNAL("clicked()"),self._buttonStartRegistration)
+            self.startProcess.clicked.connect(self._buttonStartRegistration)
 
 
             self.stepSize.setMaximumWidth(250)
@@ -4362,7 +4365,7 @@ class Frame(qt.QWidget):
 
 			self.progressBar.setRange(0,dataToStore.shape[0])
 			self.exportThread=ExportThread(self.resultFileName,dataToStore,'.edf',self)
-			self.connect(self.exportThread,qt.SIGNAL("Progress"),self.setProgressBar)
+			self.exportThread.Progress.connect(self.setProgressBar)
 			self.exportThread.start()
 
 		self.endSegmentationReg()	
@@ -4444,7 +4447,7 @@ class Frame(qt.QWidget):
         self.save=qt.QPushButton()
         self.save.setIcon(qt.QIcon(qt.QPixmap('./Icones/save.png')))
         self.save.setMaximumWidth(350)
-        self.connect(self.save,qt.SIGNAL("clicked()"),self._buttonSaveReg)
+        self.save.clicked.connect(self._buttonSaveReg)
 
         self.buttonLayout.addWidget( self.save)
         
@@ -4570,7 +4573,7 @@ class Frame(qt.QWidget):
 
             self.progressBar.setRange(0,dataToStore.shape[0])
             self.exportThread=ExportThread(self.resultFileName,dataToStore,'.edf',self)
-            self.connect(self.exportThread,qt.SIGNAL("Progress"),self.setProgressBar)
+            self.exportThread.Progress.connect(self.setProgressBar)
             self.exportThread.start()
 
 
