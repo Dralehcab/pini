@@ -78,6 +78,27 @@ class VTK_Render_QT(qt.QFrame):
         self.dmc.ComputeCellNormalsOn()
         self.dmc.Update()
 
+    def DecimateMesh(self,targeReduction):
+
+        print("Before decimation\n"
+              "-----------------\n"
+              "There are " + str(self.dmc.GetNumberOfPoints()) + "points.\n"
+              "There are " + str(self.dmc.GetNumberOfPolys()) + "polygons.\n")
+
+        decimate = vtk.vtkDecimatePro()
+        decimate.SetInputConnection(self.dmc.GetOutputPort())
+        decimate.SetTargetReduction(targeReduction)
+        decimate.Update()
+
+        self.dmc = vtk.vtkPolyData()
+        self.dmc.SetInputConnection(decimate.GetOutputPort())
+
+        print("After decimation \n"
+              "-----------------\n"
+              "There are " + str(self.dmc.GetNumberOfPoints()) + "points.\n"
+              "There are " + str(self.dmc.GetNumberOfPolys()) + "polygons.\n")
+
+
     def compute_Curvature(self):
 
         self.curvaturesFilter = vtk.vtkCurvatures()

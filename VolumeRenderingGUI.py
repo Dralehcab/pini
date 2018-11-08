@@ -137,9 +137,17 @@ class VolumeRenderingGUI(qt.QWidget):
         self.check_smooth = qt.QCheckBox("Smoothing Mesh")
         self.SmoothIterNb = LabelEditAndButton(True, "Smooth Iteration Number :", True, str(10), False)
         self.SmoothRelaxF = LabelEditAndButton(True, "Relaxation Factor :", True, str(0.5), False)
+
+        self.check_decim = qt.QCheckBox("Decimate Mesh")
+        self.DecimageReduc = LabelEditAndButton(True, "Target Reduction [%] :", True, str(10), False)
+
         
         self.check_box_mesh.setMaximumWidth(width_widget)
         self.ThresholdMC.setMaximumWidth(width_widget)
+
+        self.check_decim.setMaximumWidth(width_widget)
+        self.DecimageReduc.setMaximumWidth(width_widget)
+
 
         self.check_smooth.setMaximumWidth(width_widget)
         self.SmoothIterNb.setMaximumWidth(width_widget)
@@ -218,20 +226,23 @@ class VolumeRenderingGUI(qt.QWidget):
         self.mainLayout.addWidget(self.SmoothIterNb,13,2)
         self.mainLayout.addWidget(self.SmoothRelaxF,14,2)
 
-        self.mainLayout.addWidget(self.parameters_TitleAndIcons,15,2)
-        self.mainLayout.addWidget(self.checkBox,16,2)
-        self.mainLayout.addWidget(self.LabelAmb,17,2)
-        self.mainLayout.addWidget(self.sliderAmb,18,2)
-        self.mainLayout.addWidget(self.LabelDif,19,2)
-        self.mainLayout.addWidget(self.sliderDif,20,2)
-        self.mainLayout.addWidget(self.LabelSpe,21,2)
-        self.mainLayout.addWidget(self.sliderSpe,22,2)
-        self.mainLayout.addWidget(self.LabelSpeP,23,2)
-        self.mainLayout.addWidget(self.sliderSpeP,24,2)
-        self.mainLayout.addWidget(self.LabelOpa,25,2)
-        self.mainLayout.addWidget(self.sliderOpa,26,2)
-        self.mainLayout.addWidget(self.saveButton, 27, 2)
-        self.mainLayout.addWidget(self.renderButton,28,2)
+        self.mainLayout.addWidget(self.check_decim,15,2)
+        self.mainLayout.addWidget( self.DecimageReduc,16,2)
+
+        self.mainLayout.addWidget(self.parameters_TitleAndIcons,17,2)
+        self.mainLayout.addWidget(self.checkBox,18,2)
+        self.mainLayout.addWidget(self.LabelAmb,19,2)
+        self.mainLayout.addWidget(self.sliderAmb,20,2)
+        self.mainLayout.addWidget(self.LabelDif,21,2)
+        self.mainLayout.addWidget(self.sliderDif,22,2)
+        self.mainLayout.addWidget(self.LabelSpe,23,2)
+        self.mainLayout.addWidget(self.sliderSpe,24,2)
+        self.mainLayout.addWidget(self.LabelSpeP,25,2)
+        self.mainLayout.addWidget(self.sliderSpeP,26,2)
+        self.mainLayout.addWidget(self.LabelOpa,27,2)
+        self.mainLayout.addWidget(self.sliderOpa,28,2)
+        self.mainLayout.addWidget(self.saveButton, 29, 2)
+        self.mainLayout.addWidget(self.renderButton,30,2)
 
         self.setLayout(self.mainLayout)
 
@@ -601,6 +612,10 @@ class VolumeRenderingGUI(qt.QWidget):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())
                 relaxF= float(self.SmoothRelaxF.lineEdit.text())
                 self.frame.SmoothMesh(NbIter,relaxF)
+
+            if bool(self.check_decim.checkState()):
+                Reduction = float(self.DecimageReduc.lineEdit.text())/100.0
+                self.frame.DecimateMesh(NbIter,Reduction)
 
             if self.flag_curvature_calculation:
                 self.frame.flagCurvature = True
