@@ -16,9 +16,6 @@ import time
 import copy
 from skimage import transform
 from scipy.interpolate import splprep, splev
-from lxml import etree
-import xml.etree.ElementTree as ET
-
 from Interactor3D import Interactor3D
 from ImportThread import ImportThread, ImportNo, ImportDicom
 from ExportThread import ExportThread
@@ -54,7 +51,6 @@ class Frame(qt.QWidget):
 
         self.Data_list = []
         self.Name_list = []
-        self.Pixel_size = []
 
         self.ItemsLists = []
         self.ItemsInit = {'Seeds': {'Direction0': [],'Direction1': [],'Direction2': []},\
@@ -164,7 +160,6 @@ class Frame(qt.QWidget):
 
         del self.Data_list[self.imageSelection.currentRow()]
         del self.Name_list[self.imageSelection.currentRow()]
-        del self.Pixel_size[self.imageSelection.currentRow()]
         del self.ItemsLists[self.imageSelection.currentRow()]
         del self.Overlays[self.imageSelection.currentRow()]
 
@@ -177,8 +172,10 @@ class Frame(qt.QWidget):
 
     def _load(self, inputFolder = -1) :
 
+
         if inputFolder == False:
             self.inputFiles = qt.QFileDialog.getOpenFileNames(self, "Select one or more files to open", self.main_path )
+            self.inputFiles = self.inputFiles[0]
             if not self.inputFiles:
                 return 0
         else:
@@ -193,27 +190,12 @@ class Frame(qt.QWidget):
 
         if len(self.inputFiles) != 0:
 
-            self.Name_list.append(os.path.basename(self.inputFiles[0][0]))
+            self.Name_list.append(os.path.basename(self.inputFiles[0]))
 
-        pathXml = path + "/ImageInfo.xml"
+        path, filename  = os.path.split(self.inputFiles[0][0])
 
-        if os.path.isfile(pathXml):
-            tree = ET.parse(pathXml)
-            root = tree.getroot()
-
-            for child in root:
-                if child.tag == 'PixelSize':
-                    px_z = float(child.text.split(' ')[0])
-                    px_x = float(child.text.split(' ')[1])
-                    px_y = float(child.text.split(' ')[2])
-
-            self.Pixel_size.append([px_z,px_x,px_y])
-        else:
-            self.Pixel_size.append([1,1,1])
-        print self.Pixel_size
         self.progressBar.setRange(0,len(self.inputFiles)-1)
         self.importThread=ImportThread(self.inputFiles,self)
-        print self.Pixel_size[-1]
         self.importThread.Progress.connect(self.setProgressBar)
         self.importThread.finished.connect(self.setData)
 
@@ -234,9 +216,6 @@ class Frame(qt.QWidget):
 
 
         self.Name_list.append(self.inputFiles[0].split('/')[-1])
-
-        self.Pixel_size.append([1,1,1])
-
         self.importedData = ImportNo(self.inputFiles)
         self.setDataNo()
 
@@ -270,9 +249,6 @@ class Frame(qt.QWidget):
         reader = STLReader(self.inputFile[0])
         stlData = reader.data()
         self.Name_list.append('Mesh')
-
-        self.Pixel_size.append([1,1,1])
-
 
         self.ItemsLists.append(copy.deepcopy(self.ItemsInit))
         self.Overlays.append(copy.deepcopy(self.OverlayPar))
@@ -343,7 +319,6 @@ class Frame(qt.QWidget):
                 print self.inputFiles[0]
                 self.dicomClass = DicomReader([self.inputFiles[0]])
                 self.dicomClass.getListScan()
-                self.Pixel_size.append([1,1,1])
                 a = self.dicomClass.a
                 b = self.dicomClass.b
                 self.patientName =  self.dicomClass.patientName
@@ -353,8 +328,6 @@ class Frame(qt.QWidget):
                 px_z = self.dicomClass.pixel_size[0]
                 px_x = self.dicomClass.pixel_size[1]
                 px_y = self.dicomClass.pixel_size[2]
-
-                print 'Resize'
 
                 factor = [1.0/px_x,1.0/px_y, 1.0/px_z]
 
@@ -410,11 +383,7 @@ class Frame(qt.QWidget):
 
             self.image3DWidget._setDataVolume( imageOut, -150, 300)
 
-
-            self.Pixel_size[-1] = [px_z,px_x,px_y]
         del dataToImport
-        print self.dicomClass.pixel_size
-
 
     def _startLoadingMat(self):
 
@@ -460,34 +429,16 @@ class Frame(qt.QWidget):
             elif (extensionNumber == 7) :
                 extension = '.nrrd'
                 
-            self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Image Sequence ", self.loaded_path , 'Images (*' + extension + ')')
+            self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Image Sequence ", self.loaded_path , 'Images (*' + extension + ')')[0]
 
 
             dataToStore =  self.Data_list[self.imageSelection.currentRow()]
 
             self.progressBar.setRange(0,dataToStore.shape[0])
 
-            xml_ImageInfo = etree.Element("ImageInfo")
-
             Z = self.Data_list[self.imageSelection.currentRow()].shape[0]
             X = self.Data_list[self.imageSelection.currentRow()].shape[1]
             Y = self.Data_list[self.imageSelection.currentRow()].shape[2]
-
-            px_z = self.Pixel_size[self.imageSelection.currentRow()][0]
-            px_x = self.Pixel_size[self.imageSelection.currentRow()][1]
-            px_y = self.Pixel_size[self.imageSelection.currentRow()][2]
-
-            etree.SubElement(xml_ImageInfo,"ImageSize").text = (str(Z)+" "+str(X)+" "+str(Y))
-
-            etree.SubElement(xml_ImageInfo,"PixelSize").text = (str(px_z)+" "+str(px_x)+" "+str(px_y))
-
-            tree = etree.ElementTree(xml_ImageInfo)
-
-            path_Files = self.resultFileName
-
-            pathXml = '/'.join(path_Files.split('/')[:-1])
-
-            tree.write(pathXml +'/ImageInfo.xml')
 
             if extensionNumber == 2:
 
@@ -2527,10 +2478,6 @@ class Frame(qt.QWidget):
         zmax = int(self.index_zmax.lineEdit.text())
 
         im1 = self.Data_list[self.imageSelection.currentRow()]
-
-        px_size = self.Pixel_size[self.imageSelection.currentRow()]
-
-        stack = np.zeros((zmax-zmin,im1.shape[1],im1.shape[2]))
         stageNumber = int(im1.shape[0]/h)
 
         for z in range(int(h/2.0),stageNumber*h,h):
@@ -2967,12 +2914,6 @@ class Frame(qt.QWidget):
     def endRegister(self):
 
 
-
-        px_z = self.Pixel_size[0][0]
-        px_x = self.Pixel_size[0][1]
-        px_y = self.Pixel_size[0][2]
-
-
         print("--- %s seconds ---" % (time.time() - self.start_time))
         newImage = self.R.returnNumpyImage()
         self.addImage("IMovingBefore",self.R.ImageMovingBef)
@@ -3398,7 +3339,7 @@ class Frame(qt.QWidget):
     def changeROIMeasure(self):
         print self.pos1.lineEdit.text(),self.pos2.lineEdit.text(),self.pos3.lineEdit.text()
 
-        gap = 3.0/self.Pixel_size[self.imageSelection.currentRow()][0]
+        gap = 3.0
 
         print 'gap ',gap
         self.z_value1_t = int(self.pos1.lineEdit.text())+(gap/2.0)
@@ -3452,8 +3393,7 @@ class Frame(qt.QWidget):
         list_seed = self.ItemsLists[self.imageSelection.currentRow()]['Seeds']['Direction0']
         seed_trachea = list_seed[0]
         indexImage = self.imageSelection.currentRow()
-        VolumeVoxel = self.Pixel_size[self.imageSelection.currentRow()]
-        VolumeVoxel = 1#VolumeVoxel[0]*VolumeVoxel[1]*VolumeVoxel[2]
+        VolumeVoxel = 1
         print 'Pre processing'
         Image = np.copy(self.Data_list[self.imageSelection.currentRow()])
         Image += 2048
@@ -4101,7 +4041,6 @@ class Frame(qt.QWidget):
 
             self.Name_list.append(self.inputFiles[0].split('/')[-1])
 
-            self.Pixel_size.append([1,1,1])
             self.importedData = ImportNo(self.inputFiles)
             self.setDataNo()
 
@@ -4590,10 +4529,6 @@ class Frame(qt.QWidget):
         
         
     def addImage(self, name,Image,tooltip="",pxSize = [1,1,1]):
-
-
-
-        self.Pixel_size.append(pxSize)
 
         item = qt.QListWidgetItem(name)
         item.setToolTip(tooltip)

@@ -18,8 +18,8 @@ class OutputDialog(qt.QDialog) :
   
         buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel);
 
-        qt.QObject.connect(buttonBox, qt.SIGNAL('accepted()'), self.accept);
-        qt.QObject.connect(buttonBox, qt.SIGNAL('rejected()'), self.reject);
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
         self.mainLayout = qt.QGridLayout()
         self.mainLayout.addWidget(self.label, 0, 0)
         self.mainLayout.addWidget(self.outputImageFormat, 0, 1)

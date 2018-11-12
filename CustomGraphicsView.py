@@ -83,16 +83,19 @@ class CustomGraphicsView(qt.QGraphicsView):
 
     def wheelEvent(self, event):
 
-        delta = event.delta()
 
-        if (delta < 0):
-            factor = 2. ** (float(event.delta()) / 440.)
+
+        if (event.pixelDelta()< 0):
+
+            print event.pixelDelta()
+            #factor = 2. ** (float(event.pixelDelta()) / 440.)
         else:
-            factor = 2. ** (float(event.delta()) / 440.)
+            print event.pixelDelta()
+            #factor = 2. ** (float(event.pixelDelta()) / 440.)
 
-        self.zoomScale *= factor
-        self.setTransformationAnchor(qt.QGraphicsView.AnchorUnderMouse)
-        self.scale(factor, factor)
+        #self.zoomScale *= factor
+        #self.setTransformationAnchor(qt.QGraphicsView.AnchorUnderMouse)
+        #self.scale(factor, factor)
 
     def autofit(self):
         self.zoomScale = 1

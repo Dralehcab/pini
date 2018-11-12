@@ -47,7 +47,7 @@ class DicomReader():
         self.filesName.sort()
         if len(self.filesName) > 1:
             print '0'
-            fieldsToTest = ['SeriesDescription','PixelSpacing', 'Columns','Rows']
+            fieldsToTest = ['SeriesDescriptiilon','PixelSpacing', 'Columns','Rows']
             for fileName in self.filesName:
                 image=dicom.read_file(fileName,stop_before_pixels=True, force = True )
                 self.patientName = str(image.PatientName)

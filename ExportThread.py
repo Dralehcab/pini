@@ -9,6 +9,8 @@ import PyMcaQt as qt
 
 class ExportThread(qt.QThread):
 
+    Progress = qt.pyqtSignal(int)
+
     def __init__(self,files,imageStack,extension,parent):
 
         qt.QThread.__init__(self, parent)
@@ -32,6 +34,6 @@ class ExportThread(qt.QThread):
                 filename = self.outputFiles + '%4.4d' % i + self.extension
                 writter = ImageWritter(filename, image)
                 writter.writeData()
-                self.emit(qt.SIGNAL("Progress"), i)
+                self.Progress.emit(i)
 #
 
