@@ -39,6 +39,7 @@ class VTK_Render_QT(qt.QFrame):
     def MarchingCube(self,thresholdValue):
         print 'Thresh'
         thresholdValue = float((255.0 * (thresholdValue - self.minValue)) / (self.maxValue - self.minValue))
+        print thresholdValue
 
         threshold = vtk.vtkImageThreshold()
         threshold.SetInputConnection(self.data_importer.GetOutputPort())
@@ -50,19 +51,25 @@ class VTK_Render_QT(qt.QFrame):
         threshold.Update()
 
         print('Meshing')
-        #self.dmc = vtk.vtkMarchingCubes()
-        self.dmc = vtk.vtkFlyingEdges3D()
+
+        self.dmc = vtk.vtkMarchingCubes()
         self.dmc.SetInputConnection(threshold.GetOutputPort())
+        self.dmc.ComputeNormalsOn()
         self.dmc.GenerateValues(1, 1, 1)
         self.dmc.Update()
 
-
     def save_mesh(self, path):
-        stlWriter = vtk.vtkSTLWriter()
-        stlWriter.SetFileName(path +'.stl')
-        stlWriter.SetInputConnection(self.dmc.GetOutputPort())
-        stlWriter.SetFileTypeToBinary()
-        stlWriter.Write()
+
+        plyWriter = vtk.vtkPLYWriter()
+        plyWriter.SetFileName(path +'.ply')
+        plyWriter.SetInputConnection(self.dmc.GetOutputPort())
+        plyWriter.Write()
+
+        #stlWriter = vtk.vtkSTLWriter()
+        #stlWriter.SetFileName(path +'.stl')
+        #stlWriter.SetInputConnection(self.dmc.GetOutputPort())
+        #stlWriter.SetFileTypeToBinary()
+        #stlWriter.Write()
 
     def SmoothMesh(self,nbIter,RelaxFactor):
         print("Smoother")
@@ -90,22 +97,12 @@ class VTK_Render_QT(qt.QFrame):
         self.dmc.SetInputConnection(decimate.GetOutputPort())
         self.dmc.Update()
 
-
-
     def compute_Curvature(self):
 
         self.curvaturesFilter = vtk.vtkCurvatures()
         self.curvaturesFilter.SetInputConnection(self.dmc.GetOutputPort())
-        #curvaturesFilter.SetCurvatureTypeToMinimum()
-        #curvaturesFilter.SetCurvatureTypeToMaximum()
-        #self.curvaturesFilter.SetCurvatureTypeToGaussian()
         self.curvaturesFilter.SetCurvatureTypeToMean()
         self.curvaturesFilter.Update()
-
-
-
-
-
 
     def init_all_VolumeRendering_component(self, flagMesh, flagCurvature):
         self.flagMesh = flagMesh
@@ -144,8 +141,10 @@ class VTK_Render_QT(qt.QFrame):
 
         self.minValue = minValue
         self.maxValue = maxValue
-        np_array = self.image_float_to_int8(np_array, minValue,maxValue)
 
+        print minValue, maxValue
+
+        np_array = self.image_float_to_int8(np_array, minValue,maxValue)
         self.shape_data = np_array.shape
         self.data_importer.CopyImportVoidPointer(np_array, np_array.nbytes)
         self.data_importer.SetDataScalarTypeToUnsignedChar()

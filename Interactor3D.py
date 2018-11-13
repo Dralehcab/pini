@@ -29,9 +29,6 @@ class SliceVisualizer(qt.QWidget):
 
         self.flagFirstCircle = True
 
-        #self.connect(self.view, qt.SIGNAL("CustomGraphicsViewEvent"), self.clickedOnView)
-        #self.connect(self.view,qt.SIGNAL("CustomGraphicsViewEvent"),self.mouseMoved)
-        #self.connect(self.sliceSlider.slider, qt.SIGNAL("valueChanged(int)"), self._changeSlice)
         self.view.CustomGraphicsViewEvent.connect(self.clickedOnView)
         self.view.CustomGraphicsViewEvent.connect(self.mouseMoved)
         self.sliceSlider.slider.valueChanged.connect(self._changeSlice)
@@ -536,22 +533,6 @@ class Interactor3D(qt.QWidget):
         self.toolBar.doubleSlider.sigDoubleSliderValueChanged.connect( self.coronalWidget._doubleSliderValueChanged)
         self.toolBar.doubleSlider.sigDoubleSliderValueChanged.connect( self.sagittalWidget._doubleSliderValueChanged)
 
-        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.axialWidget.view.autofit)
-        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.coronalWidget.view.autofit)
-        #qt.QObject.connect(self.toolBar.zoomAutoAction, qt.SIGNAL("triggered()"), self.sagittalWidget.view.autofit)
-
-        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToRuberband)
-        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.coronalWidget.changeSelectorToRuberband)
-        #qt.QObject.connect(self.toolBar.zone1Action, qt.SIGNAL("triggered()"),self.sagittalWidget.changeSelectorToRuberband)
-
-        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.axialWidget.changeSelectorToCircle)
-        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToCircle)
-        #qt.QObject.connect(self.toolBar.drawingAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToCircle)
-
-        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"),self.axialWidget.changeSelectorToPointer)
-        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.coronalWidget.changeSelectorToPointer)
-        #qt.QObject.connect(self.toolBar.pointerAction, qt.SIGNAL("triggered()"), self.sagittalWidget.changeSelectorToPointer)
-
         self.toolBar.zoomAutoAction.triggered.connect(self.axialWidget.view.autofit)
         self.toolBar.zoomAutoAction.triggered.connect( self.coronalWidget.view.autofit)
         self.toolBar.zoomAutoAction.triggered.connect(self.sagittalWidget.view.autofit)
@@ -574,8 +555,7 @@ class Interactor3D(qt.QWidget):
         self.setLayout(layout)
 
     def _setDataVolume(self, dataVolume, minValue = -1, maxValue = -1):
-        
-        print 'Set Data Volume'
+
         self.dataShape = dataVolume.shape
         self.dataVolume = dataVolume
         

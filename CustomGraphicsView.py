@@ -22,12 +22,14 @@ class CustomGraphicsView(qt.QGraphicsView):
 
     def mousePressEvent(self, event):
 
+        ddict = {}
+
         if (event.button() == qt.Qt.LeftButton):
             dx = event.pos().x()
             dy = event.pos().y()
             clickPosition = self.mapToScene(dx, dy)
  
-            ddict = {}
+
             ddict['event'] = "MousePressed"
             ddict['x'] = clickPosition.x()
             ddict['y'] = clickPosition.y()
@@ -37,7 +39,6 @@ class CustomGraphicsView(qt.QGraphicsView):
             dy = event.pos().y()
 
             clickPosition = self.mapToScene(dx, dy)
-            ddict = {}
             ddict['event'] = "RMousePressed"
             ddict['x'] = clickPosition.x()
             ddict['y'] = clickPosition.y()
@@ -76,26 +77,21 @@ class CustomGraphicsView(qt.QGraphicsView):
             ddict['event'] = "MouseReleased"
             ddict['x'] = clickPosition.x()
             ddict['y'] = clickPosition.y()
-
-            self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
+            self.CustomGraphicsViewEvent.emit(ddict)
+            #self.emit(qt.SIGNAL("CustomGraphicsViewEvent"), ddict)
 
         return qt.QGraphicsView.mouseReleaseEvent(self, event)
 
     def wheelEvent(self, event):
 
-
-
-        if (event.pixelDelta()< 0):
-
-            print event.pixelDelta()
-            #factor = 2. ** (float(event.pixelDelta()) / 440.)
+        if (event.angleDelta().y()< 0):
+            factor = float(event.angleDelta().y()) / 1000.
         else:
-            print event.pixelDelta()
-            #factor = 2. ** (float(event.pixelDelta()) / 440.)
-
-        #self.zoomScale *= factor
-        #self.setTransformationAnchor(qt.QGraphicsView.AnchorUnderMouse)
-        #self.scale(factor, factor)
+            factor = 60./float(-event.angleDelta().y())
+        print factor
+        self.zoomScale *= factor
+        self.setTransformationAnchor(qt.QGraphicsView.AnchorUnderMouse)
+        self.scale(factor, factor)
 
     def autofit(self):
         self.zoomScale = 1

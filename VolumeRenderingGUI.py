@@ -552,13 +552,13 @@ class VolumeRenderingGUI(qt.QWidget):
 
     def _buttonParaSaveasPushed(self):
 
-        newParaFile = str(qt.QFileDialog.getSaveFileName(self, "save our parameters", '/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/'))
+        newParaFile = str(qt.QFileDialog.getSaveFileName(self, "save our parameters", './VTK_parameters/'))
         newParaFile= newParaFile.split('/')[-1]
 
         if len(newParaFile) !=0:
-            source_file_color = open('/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/history', "r")
+            source_file_color = open('./VTK_parameters/history', "r")
             files_para = source_file_color.readlines()
-            source_file_color = open('/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/history', "w")
+            source_file_color = open('./VTK_parameters/history', "w")
             for line in files_para:
                 if '.pr' in line:
                     source_file_color.writelines(newParaFile+'.pr\n')
@@ -570,12 +570,12 @@ class VolumeRenderingGUI(qt.QWidget):
         self._buttonParaSavePushed()
 
     def _buttonParaLoadPushed(self):
-        paraFile = str(qt.QFileDialog.getOpenFileName(self, "load our parameters", '/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/',str("Color File (*.pr)")))
+        paraFile = str(qt.QFileDialog.getOpenFileName(self, "load our parameters", './VTK_parameters/',str("Color File (*.pr)")))
         paraFile= paraFile.split('/')[-1]
         if len(paraFile) != 0:
-            source_file_color = open('/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/history', "r")
+            source_file_color = open('./VTK_parameters/history', "r")
             files_para = source_file_color.readlines()
-            source_file_color = open('/data/id17/broncho/md738/id17/RabbitSegm/Pini_experimental1/VTK_parameters/history', "w")
+            source_file_color = open('./VTK_parameters/history', "w")
             for line in files_para:
 
                 if '.pr' in line:
@@ -604,20 +604,30 @@ class VolumeRenderingGUI(qt.QWidget):
         self.frame.init_all_VolumeRendering_component(self.flag_mesh,self.flag_curvature_calculation)
 
         self.frame.add_arrow_field(arrow)
+
+        volumeToRender[:10,:10,:10] = 1
+        volumeToRender[-10:, :10, :10] = 1
+        volumeToRender[:10, -10:, :10] = 1
+        volumeToRender[:10, :10, -10:] = 1
+        volumeToRender[-10:, -10:, :10] = 1
+        volumeToRender[-10:, :10, -10:] = 1
+        volumeToRender[:10, -10:, -10:] = 1
+        volumeToRender[-10:,-10:,-10:] = 1
+
         self.frame.import_numpy_array(volumeToRender, minValue, maxValue)
 
         if self.flag_mesh:
             self.frame.MarchingCube(float(self.ThresholdMC.lineEdit.text()))
 
 
-            if bool(self.check_decim.checkState()):
-                Reduction = float(self.DecimageReduc.lineEdit.text())/100.0
-                self.frame.DecimateMesh(Reduction)
-
             if bool(self.check_smooth.checkState()):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())
                 relaxF= float(self.SmoothRelaxF.lineEdit.text())
                 self.frame.SmoothMesh(NbIter,relaxF)
+
+            if bool(self.check_decim.checkState()):
+                Reduction = float(self.DecimageReduc.lineEdit.text())/100.0
+                self.frame.DecimateMesh(Reduction)
 
             if self.flag_curvature_calculation:
                 self.frame.flagCurvature = True
@@ -701,5 +711,5 @@ class VolumeRenderingGUI(qt.QWidget):
 
     def _save(self):
 
-        self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Mesh ", "/")
+        self.resultFileName = qt.QFileDialog.getSaveFileName(self, "Save Mesh ", "/")[0]
         self.frame.save_mesh(self.resultFileName)
