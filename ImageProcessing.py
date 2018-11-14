@@ -447,10 +447,6 @@ def importSTL(filename):
     a = a.reshape((lines,cols,rows))
     return a 
     
-    
-
-
-
 
 def smooth_3D(vol,nbIter,Factor):
     

@@ -1375,6 +1375,8 @@ class Frame(qt.QWidget):
         self.rg_tol_min = LabelEditAndButton(True, "Threathold Min : ", True, str(1.0), False)
         self.rg_tol_max = LabelEditAndButton(True, "Threathold Max : ", True, str(2.0), False)
 
+
+
         self.segmentButton.setMaximumWidth(250)
         self.rg_tol_min.setMaximumWidth(250)
         self.rg_tol_max.setMaximumWidth(250)
@@ -1440,7 +1442,8 @@ class Frame(qt.QWidget):
         self.connected.setMaximumWidth(250)
         self.connectedCb.setMaximumWidth(250)
 
-        qt.QObject.connect(self.segmentButton, qt.SIGNAL("clicked()"), self.segment_wh_Function)
+        self.segmentButton.clicked.connect(self.segment_wh_Function)
+
 
         self.buttonLayout.setAlignment(qt.Qt.AlignTop)
         self.buttonLayout.addWidget(self.wh_level)
@@ -1476,8 +1479,13 @@ class Frame(qt.QWidget):
 
     def segment_rg_Function(self,minTh=-1,maxTh=-1, seedListToSegment = -1):
 
+        print float(str(self.rg_tol_min.lineEdit.text()))
+        print float(str(self.rg_tol_max.lineEdit.text()))
 
-       if seedListToSegment == - 1:
+        print minTh, maxTh,seedListToSegment
+
+
+        if seedListToSegment == - 1:
            seedListToSegment = []
 
            for direction in self.ItemsLists[self.imageSelection.currentRow()]['Seeds']:
@@ -1485,22 +1493,22 @@ class Frame(qt.QWidget):
                     seedListToSegment.append(seed)
 
 
-       if (len(seedListToSegment) > 0):
+        if (len(seedListToSegment) > 0):
             inputDataToSeg = self.Data_list[self.imageSelection.currentRow()]
-            if (minTh == -1) and (maxTh == -1):
+            if (minTh == False) and (maxTh == -1):
                 minTh = float(str(self.rg_tol_min.lineEdit.text()))
                 maxTh = float(str(self.rg_tol_max.lineEdit.text()))
-                
+
             print seedListToSegment
             ImageOut = IP.SegConnectedThreshold(np.copy(inputDataToSeg),minTh,maxTh,seedListToSegment)
             self.addImage( "Seg " + str(minTh) + '-'+ str(maxTh)  ,ImageOut)
             return ImageOut
-       else:
+        else:
             msgBox = qt.QMessageBox(self)
             msgBox.setText('Please Select a starting Point ')
             msgBox.exec_()
 
-       self._rg_segmentation_GUI()
+        self._rg_segmentation_GUI()
 
     def _fm_segmentation_GUI(self):
 
