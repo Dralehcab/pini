@@ -84,11 +84,12 @@ class CustomGraphicsView(qt.QGraphicsView):
 
     def wheelEvent(self, event):
 
-        if (event.angleDelta().y()< 0):
-            factor = float(event.angleDelta().y()) / 1000.
-        else:
-            factor = 60./float(-event.angleDelta().y())
-        print factor
+        factor =float(event.angleDelta().y()) / 100.0
+
+        if factor < 0:
+            factor = -factor
+            factor = 1.0/factor
+
         self.zoomScale *= factor
         self.setTransformationAnchor(qt.QGraphicsView.AnchorUnderMouse)
         self.scale(factor, factor)
