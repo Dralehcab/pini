@@ -41,19 +41,20 @@ class VTK_Render_QT(qt.QFrame):
         thresholdValue = float((255.0 * (thresholdValue - self.minValue)) / (self.maxValue - self.minValue))
         print thresholdValue
 
-        threshold = vtk.vtkImageThreshold()
-        threshold.SetInputConnection(self.data_importer.GetOutputPort())
-        threshold.ThresholdByLower(thresholdValue)  # remove all soft tissue
-        threshold.ReplaceInOn()
-        threshold.SetInValue(0)  # set all values below 400 to 0
-        threshold.ReplaceOutOn()
-        threshold.SetOutValue(1)  # set all values above 400 to 1
-        threshold.Update()
+        #threshold = vtk.vtkImageThreshold()
+        #threshold.SetInputConnection(self.data_importer.GetOutputPort())
+        #threshold.ThresholdByLower(thresholdValue)  # remove all soft tissue
+        #threshold.ReplaceInOn()
+        #threshold.SetInValue(0)  # set all values below 400 to 0
+        #threshold.ReplaceOutOn()
+        #threshold.SetOutValue(1)  # set all values above 400 to 1
+        #threshold.Update()
 
         print('Meshing')
 
         self.dmc = vtk.vtkMarchingCubes()
-        self.dmc.SetInputConnection(threshold.GetOutputPort())
+        self.dmc.SetInputConnection(self.data_importer.GetOutputPort())
+        self.dmc.SetValue(0,thresholdValue)
         self.dmc.ComputeNormalsOn()
         self.dmc.GenerateValues(1, 1, 1)
         self.dmc.Update()

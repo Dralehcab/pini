@@ -749,7 +749,7 @@ class Frame(qt.QWidget):
             self.checkClosing.setCheckState(0)
             self.checkFilling.setCheckState(0)
             self.checkDistance.setCheckState(0)
-            self.checkSkelettonsetCheckState(0)
+            self.checkSkeletton.setCheckState(0)
 
     def Dil(self):
         if self.checkDilatation.checkState() == 2:
@@ -1836,8 +1836,6 @@ class Frame(qt.QWidget):
 
     def _segFromContour(self):
 
-
-
         if len(self.ItemsLists[self.imageSelection.currentRow()]["Poly"]["Direction0"]) != 0:
             self._smoothContours()
             self._smoothContours()
@@ -1859,7 +1857,9 @@ class Frame(qt.QWidget):
 
 
             mask_Out= IP.morpho('Fill', mask_Out, 0)
-            return mask_Out
+
+
+            self.addImage('SegContour',mask_Out*self.Data_list[self.imageSelection.currentRow()])
 
 
     def mathFunction(self):
