@@ -617,8 +617,10 @@ class VolumeRenderingGUI(qt.QWidget):
         self.frame.import_numpy_array(volumeToRender, minValue, maxValue)
 
         if self.flag_mesh:
-            self.frame.MarchingCube(float(self.ThresholdMC.lineEdit.text()))
 
+            list_th = float(self.ThresholdMC.lineEdit.text().split())
+
+            self.frame.MarchingCube(list_th)
 
             if bool(self.check_smooth.checkState()):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())

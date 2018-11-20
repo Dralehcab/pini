@@ -36,9 +36,9 @@ class VTK_Render_QT(qt.QFrame):
 
         return vol
 
-    def MarchingCube(self,thresholdValue):
+    def MarchingCube(self,list_thresholdValue):
         print 'Thresh'
-        thresholdValue = float((255.0 * (thresholdValue - self.minValue)) / (self.maxValue - self.minValue))
+
         print thresholdValue
 
         #threshold = vtk.vtkImageThreshold()
@@ -54,9 +54,14 @@ class VTK_Render_QT(qt.QFrame):
 
         self.dmc = vtk.vtkMarchingCubes()
         self.dmc.SetInputConnection(self.data_importer.GetOutputPort())
-        self.dmc.SetValue(0,thresholdValue)
-        self.dmc.ComputeNormalsOn()
-        self.dmc.GenerateValues(1, 1, 1)
+
+        i = 0
+        for th in list_thresholdValue:
+            th = int((255.0 * (th - self.minValue)) / (self.maxValue - self.minValue))
+            self.dmc.SetValue(i, th)
+            i += 1
+        #self.dmc.ComputeNormalsOn()
+        #self.dmc.GenerateValues(1, 1, 1)
         self.dmc.Update()
 
     def save_mesh(self, path):
