@@ -134,6 +134,7 @@ class VolumeRenderingGUI(qt.QWidget):
 
 
         self.check_box_mesh = qt.QCheckBox("Marching Cube Volume")
+        self.check_box_mesh_bin = qt.QCheckBox("Marching Cube Volume Bin")
         self.ThresholdMC = LabelEditAndButton(True, "Value For Threshold", True, str(0.5), False)
 
         self.check_smooth = qt.QCheckBox("Smoothing Mesh")
@@ -145,7 +146,11 @@ class VolumeRenderingGUI(qt.QWidget):
 
         
         self.check_box_mesh.setMaximumWidth(width_widget)
+        self.check_box_mesh_bin.setMaximumWidth(width_widget)
+
         self.ThresholdMC.setMaximumWidth(width_widget)
+
+
 
         self.check_decim.setMaximumWidth(width_widget)
         self.DecimageReduc.setMaximumWidth(width_widget)
@@ -222,29 +227,30 @@ class VolumeRenderingGUI(qt.QWidget):
         self.mainLayout.addWidget(self.compute_Curvature,9,2)
 
         self.mainLayout.addWidget(self.check_box_mesh,10,2)
-        self.mainLayout.addWidget(self.ThresholdMC,11,2)
+        self.mainLayout.addWidget(self.check_box_mesh_bin, 11, 2)
+        self.mainLayout.addWidget(self.ThresholdMC,12,2)
 
-        self.mainLayout.addWidget(self.check_smooth,12,2)
-        self.mainLayout.addWidget(self.SmoothIterNb,13,2)
-        self.mainLayout.addWidget(self.SmoothRelaxF,14,2)
+        self.mainLayout.addWidget(self.check_smooth,13,2)
+        self.mainLayout.addWidget(self.SmoothIterNb,14,2)
+        self.mainLayout.addWidget(self.SmoothRelaxF,15,2)
 
-        self.mainLayout.addWidget(self.check_decim,15,2)
-        self.mainLayout.addWidget( self.DecimageReduc,16,2)
+        self.mainLayout.addWidget(self.check_decim,16,2)
+        self.mainLayout.addWidget( self.DecimageReduc,17,2)
 
-        self.mainLayout.addWidget(self.parameters_TitleAndIcons,17,2)
-        self.mainLayout.addWidget(self.checkBox,18,2)
-        self.mainLayout.addWidget(self.LabelAmb,19,2)
-        self.mainLayout.addWidget(self.sliderAmb,20,2)
-        self.mainLayout.addWidget(self.LabelDif,21,2)
-        self.mainLayout.addWidget(self.sliderDif,22,2)
-        self.mainLayout.addWidget(self.LabelSpe,23,2)
-        self.mainLayout.addWidget(self.sliderSpe,24,2)
-        self.mainLayout.addWidget(self.LabelSpeP,25,2)
-        self.mainLayout.addWidget(self.sliderSpeP,26,2)
-        self.mainLayout.addWidget(self.LabelOpa,27,2)
-        self.mainLayout.addWidget(self.sliderOpa,28,2)
-        self.mainLayout.addWidget(self.saveButton, 29, 2)
-        self.mainLayout.addWidget(self.renderButton,30,2)
+        self.mainLayout.addWidget(self.parameters_TitleAndIcons,18,2)
+        self.mainLayout.addWidget(self.checkBox,19,2)
+        self.mainLayout.addWidget(self.LabelAmb,20,2)
+        self.mainLayout.addWidget(self.sliderAmb,21,2)
+        self.mainLayout.addWidget(self.LabelDif,22,2)
+        self.mainLayout.addWidget(self.sliderDif,23,2)
+        self.mainLayout.addWidget(self.LabelSpe,24,2)
+        self.mainLayout.addWidget(self.sliderSpe,25,2)
+        self.mainLayout.addWidget(self.LabelSpeP,26,2)
+        self.mainLayout.addWidget(self.sliderSpeP,27,2)
+        self.mainLayout.addWidget(self.LabelOpa,28,2)
+        self.mainLayout.addWidget(self.sliderOpa,29,2)
+        self.mainLayout.addWidget(self.saveButton, 30, 2)
+        self.mainLayout.addWidget(self.renderButton,31,2)
 
         self.setLayout(self.mainLayout)
 
@@ -552,7 +558,7 @@ class VolumeRenderingGUI(qt.QWidget):
 
     def _buttonParaSaveasPushed(self):
 
-        newParaFile = str(qt.QFileDialog.getSaveFileName(self, "save our parameters", './VTK_parameters/'))
+        newParaFile = str(qt.QFileDialog.getSaveFileName(self, "save o                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ur parameters", './VTK_parameters/'))
         newParaFile= newParaFile.split('/')[-1]
 
         if len(newParaFile) !=0:
@@ -597,6 +603,7 @@ class VolumeRenderingGUI(qt.QWidget):
         minValue = np.min(volumeToRender)
         maxValue = np.max(volumeToRender)
         self.flag_mesh = bool(self.check_box_mesh.checkState())
+        self.flag_mesh_bin = bool(self.check_box_mesh_bin.checkState())
 
         self.flag_curvature_calculation = bool(self.compute_Curvature.checkState())
         self.flag_distance_calculation = bool(self.compute_Distance.checkState())
@@ -605,22 +612,23 @@ class VolumeRenderingGUI(qt.QWidget):
 
         self.frame.add_arrow_field(arrow)
 
-        volumeToRender[:10,:10,:10] = 1
+        volumeToRender[:10 ,:10,:10] = 1
         volumeToRender[-10:, :10, :10] = 1
-        volumeToRender[:10, -10:, :10] = 1
-        volumeToRender[:10, :10, -10:] = 1
+        volumeToRender[:10 , -10:, :10] = 1
+        volumeToRender[:10 , :10, -10:] = 1
         volumeToRender[-10:, -10:, :10] = 1
         volumeToRender[-10:, :10, -10:] = 1
-        volumeToRender[:10, -10:, -10:] = 1
+        volumeToRender[:10 , -10:, -10:] = 1
         volumeToRender[-10:,-10:,-10:] = 1
 
         self.frame.import_numpy_array(volumeToRender, minValue, maxValue)
 
-        if self.flag_mesh:
+        if self.flag_mesh or self.flag_mesh_bin:
 
-            list_th = float(self.ThresholdMC.lineEdit.text().split())
+            list_th = self.ThresholdMC.lineEdit.text().split()
+            list_th = [float(i) for i in list_th]
 
-            self.frame.MarchingCube(list_th)
+            self.frame.MarchingCube(list_th,self.flag_mesh_bin)
 
             if bool(self.check_smooth.checkState()):
                 NbIter = int(self.SmoothIterNb.lineEdit.text())

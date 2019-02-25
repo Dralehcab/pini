@@ -5,7 +5,7 @@ from EdfFile import EdfFile
 from TiffI0 import TiffIO
 import numpy as np
 import matplotlib.image as mpimg
-import dicom as dicom
+import pydicom as dicom
 import scipy.io as sio
 
 import ImageProcessing as IP
@@ -46,7 +46,6 @@ class DicomReader():
 
         self.filesName.sort()
         if len(self.filesName) > 1:
-            print '0'
             fieldsToTest = ['SeriesDescriptiilon','PixelSpacing', 'Columns','Rows']
             for fileName in self.filesName:
                 image=dicom.read_file(fileName,stop_before_pixels=True, force = True )
@@ -70,7 +69,6 @@ class DicomReader():
 
 
         else:
-            print '1'
             self.seriesDescription = []
             image=dicom.read_file(self.filesName[0], force = True)
             self.pixel_size[0] = abs(float(image.SpacingBetweenSlices))

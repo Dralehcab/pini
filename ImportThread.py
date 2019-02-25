@@ -4,7 +4,7 @@
 import PyMcaQt as qt
 import os
 import numpy as np
-import dicom
+import pydicom
 
 from ImageReader import ImageReader
 
@@ -77,10 +77,8 @@ class ImportDicom():
 
         self.inputFiles=files
         self.FileReference = str(self.inputFiles[0])
-        print self.FileReference
             
         data = dicom.read_file(str(self.inputFiles[0]), force = True).pixel_array
-        print data
         self.shapeReference = data.shape
         typeImage = data.dtype
         self.inputData = np.zeros((len(self.inputFiles), self.shapeReference[0], self.shapeReference[1]), dtype= typeImage)

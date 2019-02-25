@@ -488,7 +488,7 @@ class SliceVisualizer(qt.QWidget):
 
     def changeColorMap(self, R, G, B):
         if len(R) != 256 or len(G) != 256 or len(B) != 256:
-            print "Wrong Color Array shape"
+            pass
         else:
             self.colortable = []
             for i in range(256):

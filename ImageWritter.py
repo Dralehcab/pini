@@ -8,8 +8,6 @@ import scipy.io as sio
 import scipy
 import SimpleITK as sitk
 
-import dicom, dicom.UID
-from dicom.dataset import Dataset, FileDataset
 import datetime, time
 import nibabel as nib
 
@@ -50,7 +48,6 @@ class ImageWritter(object) :
 
 
 def write_nifti( pixel_array, filename):
-    print 'In'
     new_image = nib.Nifti1Image(pixel_array, affine=np.eye(4))
     nib.save(new_image, filename)
     

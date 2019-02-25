@@ -7,9 +7,11 @@ Created on Mon Jan 16 17:26:54 2017
 
 import numpy as np
 import vtk
+from vtk.util.numpy_support import vtk_to_numpy
 
 import PyMcaQt as qt
 from time import gmtime, strftime
+import array
 
 
 class VTK_Render_QT(qt.QFrame):
@@ -36,33 +38,77 @@ class VTK_Render_QT(qt.QFrame):
 
         return vol
 
-    def MarchingCube(self,list_thresholdValue):
-        print 'Thresh'
+    def MarchingCube(self,list_thresholdValue, flag_bin):
 
-        print thresholdValue
 
-        #threshold = vtk.vtkImageThreshold()
-        #threshold.SetInputConnection(self.data_importer.GetOutputPort())
-        #threshold.ThresholdByLower(thresholdValue)  # remove all soft tissue
-        #threshold.ReplaceInOn()
-        #threshold.SetInValue(0)  # set all values below 400 to 0
-        #threshold.ReplaceOutOn()
-        #threshold.SetOutValue(1)  # set all values above 400 to 1
-        #threshold.Update()
+        thresholdValue = int((255.0 * (list_thresholdValue[0] - self.minValue)) / (self.maxValue - self.minValue))
+
+
+        threshold = vtk.vtkImageThreshold()
+        threshold.SetInputConnection(self.data_importer.GetOutputPort())
+        threshold.ThresholdByLower(thresholdValue)  # remove all soft tissue
+        threshold.ReplaceInOn()
+        threshold.SetInValue(0)  # set all values below 400 to 0
+        threshold.ReplaceOutOn()
+        threshold.SetOutValue(1)  # set all values above 400 to 1
+        threshold.Update()
 
         print('Meshing')
 
         self.dmc = vtk.vtkMarchingCubes()
-        self.dmc.SetInputConnection(self.data_importer.GetOutputPort())
-
-        i = 0
-        for th in list_thresholdValue:
-            th = int((255.0 * (th - self.minValue)) / (self.maxValue - self.minValue))
-            self.dmc.SetValue(i, th)
-            i += 1
-        #self.dmc.ComputeNormalsOn()
-        #self.dmc.GenerateValues(1, 1, 1)
+        self.dmc.SetInputConnection(threshold.GetOutputPort())
+        self.dmc.ComputeNormalsOn()
+        self.dmc.GenerateValues(1, 1, 1)
         self.dmc.Update()
+
+
+        # print 'Thresh'
+        #
+        # if flag_bin:
+        #
+        #     threshold = vtk.vtkImageThreshold()
+        #     threshold.SetInputConnection(self.data_importer.GetOutputPort())
+        #
+        #     if len(list_thresholdValue) < 2 :
+        #         th_low = int((255.0 * (list_thresholdValue[0] - self.minValue)) / (self.maxValue - self.minValue))
+        #         threshold.ThresholdByLower(th_low)  # remove all soft tissue
+        #         threshold.ReplaceInOn()
+        #         threshold.SetInValue(0)  # set all values below 400 to 0
+        #         threshold.ReplaceOutOn()
+        #         threshold.SetOutValue(1)  # set all values above 400 to 1
+        #         threshold.Update()
+        #     else:
+        #         th_low = int((255.0 * (list_thresholdValue[0] - self.minValue)) / (self.maxValue - self.minValue))
+        #         th_high = int((255.0 * (list_thresholdValue[1] - self.minValue)) / (self.maxValue - self.minValue))
+        #
+        #         print th_low, th_high
+        #
+        #         threshold.ThresholdBetween(th_low,th_high)
+        #         threshold.Update()
+        #
+        #     print('Meshing')
+        #
+        #     self.dmc = vtk.vtkMarchingCubes()
+        #     self.dmc.SetInputConnection(threshold.GetOutputPort())
+        #     self.dmc.ComputeNormalsOn()
+        #     self.dmc.GenerateValues(1, 1, 1)
+        #     self.dmc.Update()
+        #
+        # else:
+        #
+        #     self.dmc = vtk.vtkMarchingCubes()
+        #     self.dmc.SetInputConnection(self.data_importer.GetOutputPort())
+        #     i = 0
+        #     for th in list_thresholdValue:
+        #         print self.minValue, self.maxValue
+        #         print th
+        #         th = int((255.0 * (th - self.minValue)) / (self.maxValue - self.minValue))
+        #         print th
+        #         self.dmc.SetValue(i, th)
+        #         i += 1
+        #     self.dmc.ComputeNormalsOn()
+        #     self.dmc.GenerateValues(1, 1, 1)
+        #     self.dmc.Update()
 
     def save_mesh(self, path):
 
@@ -108,7 +154,10 @@ class VTK_Render_QT(qt.QFrame):
         self.curvaturesFilter = vtk.vtkCurvatures()
         self.curvaturesFilter.SetInputConnection(self.dmc.GetOutputPort())
         self.curvaturesFilter.SetCurvatureTypeToMean()
+
         self.curvaturesFilter.Update()
+
+        np.savetxt("./result.txt",np.trim_zeros(vtk_to_numpy(self.curvaturesFilter.GetOutput().GetPointData().GetScalars())))
 
     def init_all_VolumeRendering_component(self, flagMesh, flagCurvature):
         self.flagMesh = flagMesh
@@ -148,15 +197,27 @@ class VTK_Render_QT(qt.QFrame):
         self.minValue = minValue
         self.maxValue = maxValue
 
-        print minValue, maxValue
 
-        np_array = self.image_float_to_int8(np_array, minValue,maxValue)
+
+        np_array = self.image_float_to_int8(np_array, minValue, maxValue)
         self.shape_data = np_array.shape
         self.data_importer.CopyImportVoidPointer(np_array, np_array.nbytes)
         self.data_importer.SetDataScalarTypeToUnsignedChar()
         self.data_importer.SetNumberOfScalarComponents(1)
-        self.data_importer.SetDataExtent(0, self.shape_data[2] - 1, 0, self.shape_data[1] - 1, 0, self.shape_data[0] - 1)
-        self.data_importer.SetWholeExtent(0, self.shape_data[2] - 1, 0, self.shape_data[1] - 1, 0, self.shape_data[0] - 1)
+        self.data_importer.SetDataExtent(0, self.shape_data[2] - 1, 0, self.shape_data[1] - 1, 0,self.shape_data[0] - 1)
+        self.data_importer.SetWholeExtent(0, self.shape_data[2] - 1, 0, self.shape_data[1] - 1, 0,self.shape_data[0] - 1)
+
+    def vtk_to_array(self, vtk_array,FileName):
+
+        reader = vtk.vtkUnstructuredGridReader()
+        reader.SetFileName(FileName)
+        reader.ReadAllScalarsOn()
+        reader.ReadAllVectorsOn()
+        reader.Update()
+        usg = dsa.WrapDataObject(reader.GetOutput())
+        array1 = usg.PointData['Array1Name']  # Assuming you know the name of the array
+        # array1 is a child class type of numpy.ndarray type
+        np.savetxt('array1.dat', array1, fmt='%4.5f')
 
     def reset_alpha_channel(self):
         self.alpha_channel_function.RemoveAllPoints()

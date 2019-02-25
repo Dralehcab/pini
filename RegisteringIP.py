@@ -73,7 +73,7 @@ class Registering():
 
 
     def initIntitialTransform(self):
-        print 'Rigid Registration'
+
         if self.dicPar['Inputs']['InitT'] != "None":
             if self.dicPar['Inputs']['InitT'] == "Geometry":
                 self.init_t = sitk.CenteredTransformInitializer(self.ImageInitFixe, self.ImageInitMoving , sitk.Euler3DTransform(), sitk.CenteredTransformInitializerFilter.GEOMETRY)
@@ -100,7 +100,7 @@ class Registering():
         self.reg_method.SetInitialTransform(self.initial_transform)
 
     def initMetric(self):
-	print self.dicPar
+
         """ Metric """
         if self.dicPar['Metric']['Method'] ==  "Means Squares":
             self.reg_method.SetMetricAsMeanSquares()
@@ -331,7 +331,7 @@ class Registering():
         self.reg_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
 
     def Execute(self):
-        print self.reg_method
+
         self.Final_Transform = self.reg_method.Execute(self.ImageFixe, self.ImageMoving)
 
     def computeJacobian(self,vectorFieldITK):

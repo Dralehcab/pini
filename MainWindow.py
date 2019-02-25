@@ -71,6 +71,10 @@ class MyMainWindow(qt.QMainWindow) :
         resampleAction.triggered.connect( self.mainWidget._resample_GUI )
         FormatingMenu.addAction(resampleAction)
 
+        contrastAction = qt.QAction('&Contrast', self)
+        contrastAction.triggered.connect( self.mainWidget._contrast_GUI )
+        FormatingMenu.addAction(contrastAction)
+
         rotationAction = qt.QAction('&Rotation', self)
         rotationAction.triggered.connect(self.mainWidget._rotation_GUI )
         FormatingMenu.addAction(rotationAction)
@@ -218,7 +222,11 @@ class MyMainWindow(qt.QMainWindow) :
         hessian_Action.triggered.connect( self.mainWidget.hessian_GUI)
         EdgeDetectionMenu.addAction(hessian_Action)
 
-
+        frangi_Action = qt.QAction('&Frangi Detection', self)
+        frangi_Action.setStatusTip('Frangi Detection')
+        frangi_Action.triggered.connect(self.mainWidget.frangi_GUI)
+        EdgeDetectionMenu.addAction(frangi_Action)
+ 
         FilterMenu = ProcessMenu.addMenu('&Filter')
 
         filter_ani_diff_Action = qt.QAction('&Anisotropic Diffusion', self)
@@ -246,6 +254,14 @@ class MyMainWindow(qt.QMainWindow) :
         filter_wv_Action.setStatusTip('Wavelet Filtering')
         filter_wv_Action.triggered.connect( self.mainWidget.filter_WL_GUI)
         FilterMenu.addAction(filter_wv_Action)
+
+
+        filter_mip_Action = qt.QAction('&Maximun/Minimum Image Projection', self)
+        filter_mip_Action.setStatusTip('Maximum/Minimum Image Projection')
+        filter_mip_Action.triggered.connect( self.mainWidget.filter_MIP_GUI)
+        FilterMenu.addAction(filter_mip_Action)
+
+
 
         mathAction = qt.QAction( '&Math', self)
         mathAction.setStatusTip('Volume Simple Math Calculation')
