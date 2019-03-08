@@ -145,8 +145,8 @@ def compute_sVair(ImageFix, ImageMov, Trachea, Distance):
     ImageMovMed = np.copy(median(ImageMov, 3))
     ImageFixMed = np.copy(median(ImageFix, 3))
 
-    ImageMov = median(ImageMov, 1)
-    ImageFix = median(ImageFix, 1)
+    ImageMov = median(ImageMov, 1,False)
+    ImageFix = median(ImageFix, 1, False)
 
     # ImageMov = grey_dilation(ImageMov, size=(5,5,5))
 
@@ -1389,7 +1389,7 @@ def recursiveGauss(vol, sigma):
     return imageFromITKToNumpy(ITK_Vol)
 
 
-def median(vol, radius, flag_2D):
+def median(vol, radius, flag_2D=False):
     if flag_2D == 0:
         ITK_Vol = imageFromNumpyToITK(vol)
         med = sitk.MedianImageFilter()

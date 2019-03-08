@@ -10,6 +10,7 @@ Created on Tue Dec 20 14:10:35 2016
 import PyMcaQt as qt
 
 class registerThread(qt.QThread):
+    RegDone = qt.pyqtSignal()
 
     def __init__(self,register,parent):
 
@@ -19,5 +20,4 @@ class registerThread(qt.QThread):
 
     def run(self):
         self.register.Execute()
-        self.emit(qt.SIGNAL("RegDone"))
-        
+        self.RegDone.emit()

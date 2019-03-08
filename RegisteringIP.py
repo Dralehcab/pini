@@ -314,12 +314,10 @@ class Registering():
         vect1 = []
         vect2 = []
 
-
-
         
-        for i in range(0,len(self.dicPar['Scaling'])/2):
+        for i in range(0,int(len(self.dicPar['Scaling'])/2)):
             parS = int(self.dicPar['Scaling'][i])
-            parSm = int(self.dicPar['Scaling'][i+len(self.dicPar['Scaling'])/2])
+            parSm = self.dicPar['Scaling'][i+int(len(self.dicPar['Scaling'])/2)]
             vect1.append(parS)
             vect2.append(parSm)
 

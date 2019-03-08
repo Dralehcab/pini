@@ -249,33 +249,37 @@ class Frame(qt.QWidget):
     def _loadDicom(self):
 
         self.inputFiles = qt.QFileDialog.getOpenFileNames(self, "Select Dicom/Mat Files to Open", self.main_path)
-        self.loaded_path = os.path.dirname(self.inputFiles[0])
+        print('*-*-')
+        print(self.inputFiles[0])
 
-        if self.inputFiles[0].endswith('.mat'):
-            self.matClass = MatReader(self.inputFiles[0])
+
+        self.loaded_path = os.path.dirname(self.inputFiles[0][0])
+
+        if self.inputFiles[0][0].endswith('.mat'):
+            self.matClass = MatReader(self.inputFiles[0][0])
             self.matGUI = MatReaderGUI(self.matClass.getListScan())
             self.buttonLayout.addWidget(self.matGUI)
             self.matGUI.startImporting.clicked.connect(self._startLoadingMat)
-        elif self.inputFiles[0].endswith('.nrrd'):
+        elif self.inputFiles[0][0].endswith('.nrrd'):
 
-            data, xxxx = nrrd.read(self.inputFiles[0])
+            data, xxxx = nrrd.read(self.inputFiles[0][0])
             data = np.array(data)
 
-            self.addImage(self.inputFiles[0], np.swapaxes(data, 0, 1))
+            self.addImage(self.inputFiles[0][0], np.swapaxes(data, 0, 1))
 
-        elif self.inputFiles[0].endswith('.nii'):
+        elif self.inputFiles[0][0].endswith('.nii'):
 
-            filenii = nib.load(self.inputFiles[0])
+            filenii = nib.load(self.inputFiles[0][0])
             ImageOut = np.asarray(filenii.get_data())
             shapeIm = ImageOut.shape
 
             if len(shapeIm) > 3:
                 nImage = shapeIm[3]
                 for ni in range(0, nImage):
-                    self.addImage(str(ni) + '_' + self.inputFiles[0].split('/')[-1], ImageOut[:, :, :, :, ni])
+                    self.addImage(str(ni) + '_' + self.inputFiles[0][0].split('/')[-1], ImageOut[:, :, :, :, ni])
 
             elif len(shapeIm) <= 3:
-                self.addImage(self.inputFiles[0].split('/')[-1], ImageOut)
+                self.addImage(self.inputFiles[0][0].split('/')[-1], ImageOut)
 
 
 
@@ -286,7 +290,7 @@ class Frame(qt.QWidget):
 
             if reply == qt.QMessageBox.Yes:
 
-                self.dicomClass = DicomReader([self.inputFiles[0]])
+                self.dicomClass = DicomReader([self.inputFiles[0][0]])
                 self.dicomClass.getListScan()
                 a = self.dicomClass.a
                 b = self.dicomClass.b
@@ -487,6 +491,7 @@ class Frame(qt.QWidget):
         self.progressBar.setValue(i)
 
     def _dataToShowChanged(self):
+
         self.image3DWidget._setDataVolume(self.Data_list[self.imageSelection.currentRow()])
         if len(self.ItemsLists) > self.imageSelection.currentRow():
             self.image3DWidget.updateItems(self.ItemsLists[self.imageSelection.currentRow()])
@@ -3767,7 +3772,6 @@ class Frame(qt.QWidget):
         ImageExpi = self.Data_list[self.ImageExpi.currentIndex()]
 
         #        NewSizeZ = np.max([ImageInspi.shape[0],ImageExpi.shape[0]])
-
         #        print 'Removing Unecessary Slices'
         #        if ImageInspi.shape[0] != NewSizeZ:
         #
@@ -3821,9 +3825,9 @@ class Frame(qt.QWidget):
         Image_Inspi = self.Data_list[self.ImageInspi.currentIndex()]
         c_s = self.ItemsLists[self.imageSelection.currentRow()]['Seeds']['Direction0']
         maskSeg = IP.SegConnectedThresholdC(np.copy(Image_Inspi), 4, varInspi, 1, c_s[1:])
-        mask_Out1 = IP.morpho('Fill', maskSeg, 0)
+        #mask_Out1 = IP.morpho('Fill', maskSeg, 0)
 
-        Image_InspiR = np.copy(Image_Inspi * mask_Out1)
+        Image_InspiR = np.copy(Image_Inspi * maskSeg)
 
         mask = np.ones((Image_InspiR.shape[0], Image_InspiR.shape[1], Image_InspiR.shape[1]))
         mask[Image_InspiR < -1100.0] = 0
@@ -3837,8 +3841,8 @@ class Frame(qt.QWidget):
         Image_Expi = self.Data_list[self.ImageExpi.currentIndex()]
         c_s = self.ItemsLists[self.imageSelection.currentRow()]['Seeds']['Direction0']
         maskSeg = IP.SegConnectedThresholdC(np.copy(Image_Expi), 4, varExpi, 1, c_s[1:])
-        mask_Out2 = IP.morpho('Fill', maskSeg, 0)
-        Image_ExpiR = np.copy(Image_Expi * mask_Out2)
+        #mask_Out2 = IP.morpho('Fill', maskSeg, 0)
+        Image_ExpiR = np.copy(Image_Expi * maskSeg)
 
         self.addImage('ImageExpiR', Image_ExpiR, '', [px_z, px_x, px_y])
         self.Seg2Index = self.imageSelection.currentRow()
@@ -4154,14 +4158,14 @@ class Frame(qt.QWidget):
 
         Trachea = np.copy(self.Data_list[self.Seg3Index])
 
-        self.imageSelection.setCurrentRow(self.Seg1Index)
-        self.removeImage()
-        self.imageSelection.setCurrentRow(self.Seg2Index - 1)
-        self.removeImage()
-        self.imageSelection.setCurrentRow(self.Seg3Index - 2)
-        self.removeImage()
-        self.imageSelection.setCurrentRow(self.Seg4Index - 3)
-        self.removeImage()
+        #self.imageSelection.setCurrentRow(self.Seg1Index)
+        #self.removeImage()
+        #self.imageSelection.setCurrentRow(self.Seg2Index - 1)
+        #self.removeImage()
+        #self.imageSelection.setCurrentRow(self.Seg3Index - 2)
+        #self.removeImage()
+        #self.imageSelection.setCurrentRow(self.Seg4Index - 3)
+        #self.removeImage()
 
         print
         'Registration Done in '

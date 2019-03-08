@@ -76,16 +76,19 @@ class ImportDicom():
     def __init__(self,files):
 
         self.inputFiles=files
-        self.FileReference = str(self.inputFiles[0])
+        self.FileReference = str(self.inputFiles[0][0])
             
-        data = dicom.read_file(str(self.inputFiles[0]), force = True).pixel_array
+        data = pydicom.read_file(str(self.inputFiles[0][0]), force = True).pixel_array
         self.shapeReference = data.shape
         typeImage = data.dtype
-        self.inputData = np.zeros((len(self.inputFiles), self.shapeReference[0], self.shapeReference[1]), dtype= typeImage)
+        self.inputData = np.zeros((len(self.inputFiles[0]), self.shapeReference[0], self.shapeReference[1]), dtype= typeImage)
+
+
 
         i = 0
-        for filename in self.inputFiles :
+        for filename in self.inputFiles[0] :
             filename = str(filename)
-            data = dicom.read_file(filename, force = True).pixel_array
-            self.inputData[i, :, :] = data
+            data = pydicom.read_file(filename, force = True)
+            data.file_meta.TransferSyntaxUID = pydicom.uid.ImplicitVRLittleEndian
+            self.inputData[i, :, :] = data.pixel_array
             i += 1
