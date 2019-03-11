@@ -2812,7 +2812,7 @@ class Frame(qt.QWidget):
         self.optionRegisterW.show()
 
     def lauchRegistering(self, dicPar=-1):
-        if dicPar == -1:
+        if dicPar == False:
             dicPar = self.optionRegisterW.dicPar
 
         self.plt.show()
@@ -2843,8 +2843,13 @@ class Frame(qt.QWidget):
         #        self.plt.repaint()
 
         self.counterIter = 0
+
+        print('HEY')
+        print(dicPar)
+        print('Done')
         self.R = IPR.Registering(dicPar, self.Data_list, [1, 1, 1])
         self.regThread = rT.registerThread(self.R, self)
+
 
         if not self.flagMacro:
             self.regThread.RegDone.connect(self.endRegister)

@@ -939,15 +939,16 @@ class RegisteringOption(qt.QWidget):
     def save_dic(self):
 
         print(os.path.exists('./Data/'))
-        with open('./Data/DicR.pkl', 'wb') as f:
+        print(os.path.dirname(os.path.abspath(__file__)))
+        with open('/home/broche/Code/Python/PINI/Data/DicR.pkl', 'wb') as f:
             pickle.dump(self.dicPar, f, pickle.HIGHEST_PROTOCOL)
 
     def load_obj(self ):
-        with open('./Data/DicR.pkl', 'rb') as f:
+        with open('/home/broche/Code/Python/PINI/Data/DicR.pkl', 'rb') as f:
             self.dicPar = pickle.load(f)
 
     def restoreValues(self):
-        if os.path.exists('./Data/DicR.pkl'):
+        if os.path.exists('/home/broche/Code/Python/PINI/Data/DicR.pkl'):
             self.load_obj()
             self.setImages()
 

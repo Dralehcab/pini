@@ -101,6 +101,9 @@ class Registering():
 
     def initMetric(self):
 
+
+        print(self.dicPar)
+
         """ Metric """
         if self.dicPar['Metric']['Method'] ==  "Means Squares":
             self.reg_method.SetMetricAsMeanSquares()
